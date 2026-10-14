@@ -72,3 +72,89 @@ export function holderOf(root: SatoriNode, text: string): SatoriNode {
   if (!found) throw new Error(`no node holds ${JSON.stringify(text)}`);
   return found;
 }
+
+/**
+ * Checks shared by the layouts that follow the same contract: themed root,
+ * exact texts, counter, footer only with source (RND-04), highlight (RND-05) and
+ * text as plain strings (RND-06).
+ */
+export function commonLayoutSuite<S extends { source?: string; highlight?: string }>(opts: {
+  name: string;
+  render: (slide: S, ctx: LayoutContext) => SatoriNode;
+  base: S;
+  /** Fields holding free text, each must appear exactly as given. */
+  textFields: readonly (keyof S & string)[];
+  /** Field where the highlight is applied and the phrase to highlight, when the layout supports it. */
+  highlight: { field: keyof S & string; phrase: string };
+  /** Other strings the layout always draws (for example list numerals and items). */
+  extraStrings?: readonly string[];
+}): void {
+  const { name, render, base, textFields, highlight } = opts;
+  const extra = opts.extraStrings ?? [];
+  const texts = (s: S): string[] => textFields.map((f) => s[f] as unknown as string);
+
+  describe(`${name} layout (common contract)`, () => {
+    test("root is a themed Inter div of the format size", () => {
+      for (const meta of [undefined, { theme: "light" as const, format: "linkedin-portrait" as const }]) {
+        const ctx = makeCtx({}, meta);
+        assertRoot(render(base, ctx), ctx);
+      }
+    });
+
+    test("shows each text exactly and the index/total counter", () => {
+      const strings = collectStrings(render(base, makeCtx({ index: 3, total: 7 })));
+      for (const t of texts(base)) expect(strings).toContain(t);
+      expect(strings).toContain("3/7");
+    });
+
+    test("footer shows the exact source only when given (RND-04)", () => {
+      const ctx = makeCtx();
+      expect(collectStrings(render({ ...base, source: "Fonte: Relatório 2025, p. 4" }, ctx))).toContain("Fonte: Relatório 2025, p. 4");
+      const noSource = collectStrings(render(base, ctx));
+      const emptySource = collectStrings(render({ ...base, source: "" }, ctx));
+      expect(noSource).toEqual(emptySource);
+      expect(noSource.sort()).toEqual([...texts(base), ...extra, "1/6"].sort());
+    });
+
+    test("highlight becomes an accent span and the text still concatenates back (RND-05)", () => {
+      const ctx = makeCtx();
+      const field = base[highlight.field] as unknown as string;
+      expect(field).toContain(highlight.phrase);
+      const node = render({ ...base, highlight: highlight.phrase }, ctx);
+      const found = spans(node);
+      expect(found).toHaveLength(1);
+      expect(found[0]!.props.style?.color).toBe(ctx.tokens.accent);
+      expect(collectStrings(found[0]!)).toEqual([highlight.phrase]);
+      const at = field.indexOf(highlight.phrase);
+      const holder = collectNodes(node).find((n) => children(n).includes(found[0]!))!;
+      const parts = children(holder).flatMap((c) => collectStrings(c));
+      expect(parts.join("")).toBe(field);
+      expect(parts.join("").slice(at, at + highlight.phrase.length)).toBe(highlight.phrase);
+    });
+
+    test("no span without highlight, nor when the phrase is absent", () => {
+      expect(spans(render(base, makeCtx()))).toHaveLength(0);
+      expect(spans(render({ ...base, highlight: "frase-inexistente" }, makeCtx()))).toHaveLength(0);
+    });
+
+    test("fontScale scales font sizes", () => {
+      const first = texts(base)[0]!;
+      const full = holderOf(render(base, makeCtx({ fontScale: 1 })), first).props.style!.fontSize as number;
+      const half = holderOf(render(base, makeCtx({ fontScale: 0.5 })), first).props.style!.fontSize as number;
+      expect(half).toBeLessThan(full);
+    });
+
+    test.each(PAYLOADS)("payload %p stays plain text in every field (RND-06)", (payload) => {
+      for (const field of [...textFields, "source" as const]) {
+        const slide = { ...base, [field]: payload } as S;
+        const node = render(slide, makeCtx());
+        assertNoInjectedElements(node);
+        expect(collectStrings(node)).toContain(payload);
+      }
+      const hl = { ...base, [highlight.field]: `a ${payload} b`, highlight: payload } as S;
+      const node = render(hl, makeCtx());
+      assertNoInjectedElements(node);
+      expect(collectStrings(node).join("")).toContain(`a ${payload} b`);
+    });
+  });
+}
