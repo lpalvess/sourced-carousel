@@ -2,6 +2,8 @@
 
 [English](README.en.md) | Português
 
+![Carrossel de exemplo gerado pelo sourced-carousel: seis slides no tema escuro, com o número 42% e o rodapé de fonte](docs/images/hero.png)
+
 Gera um carrossel de LinkedIn em PDF e PNG a partir de um `slides.json`, e reprova o carrossel se algum número não estiver no arquivo de fatos que você forneceu. Roda em um container sem rede, sem navegador. Também é uma skill do Claude Code (veja [SKILL.md](SKILL.md)).
 
 ## Por que existe
@@ -39,6 +41,14 @@ error slide 2 number-not-in-facts: slide 2 has the number "43%" which is not in 
 ```
 
 e o código de saída é 1.
+
+![O validador reprova o slide que diz 43% quando o arquivo de fatos só tem 42%](docs/images/validate-fails.png)
+
+O mesmo exemplo no tema claro e no formato retrato (`"meta": { "theme": "light", "format": "linkedin-portrait" }`):
+
+![Três slides do exemplo no tema claro e formato retrato](docs/images/light-portrait.png)
+
+As imagens acima são a saída real da ferramenta sobre `examples/`, montadas numa página e capturadas com Playwright em um contêiner sem rede. O Playwright não faz parte do projeto.
 
 ### O arquivo de fatos
 

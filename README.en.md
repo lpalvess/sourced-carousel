@@ -2,6 +2,8 @@
 
 English | [Português](README.md)
 
+![Example carousel made with sourced-carousel: six slides in the dark theme, with the 42% figure and the source footer](docs/images/hero.png)
+
 Generates a LinkedIn carousel as PDF and PNG from a `slides.json`, and rejects the carousel if any number is missing from the facts file you provide. It runs in a container with no network and no browser. It is also a Claude Code skill (see [SKILL.md](SKILL.md), written in Portuguese).
 
 ## Why it exists
@@ -39,6 +41,14 @@ error slide 2 number-not-in-facts: slide 2 has the number "43%" which is not in 
 ```
 
 and the exit code is 1.
+
+![The validator rejects the slide that says 43% when the facts file only has 42%](docs/images/validate-fails.png)
+
+The same example in the light theme and the portrait format (`"meta": { "theme": "light", "format": "linkedin-portrait" }`):
+
+![Three example slides in the light theme and portrait format](docs/images/light-portrait.png)
+
+The images above are the tool's real output on `examples/`, laid out on a page and captured with Playwright in a container without network. Playwright is not part of the project.
 
 ### The facts file
 
