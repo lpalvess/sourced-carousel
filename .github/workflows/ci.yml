@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.4.3
+
+      - name: Install dependencies (frozen lockfile, no install scripts)
+        run: bun install --frozen-lockfile --ignore-scripts
+
+      - name: Typecheck
+        run: bunx tsc --noEmit
+
+      - name: Test
+        run: bun test
+
+      - name: Render the example carousel (container, no network)
+        run: scripts/carousel.sh render examples/slides.json --facts examples/facts.md --out out
+
+      - name: Check the rendered output
+        run: |
+          set -euo pipefail
+          test -s out/carousel.pdf
+          expected="$(jq '.slides | length' examples/slides.json)"
+          actual="$(find out -maxdepth 1 -name '*.png' | wc -l)"
+          echo "slides in JSON: $expected, PNGs rendered: $actual"
+          test "$expected" -gt 0
+          test "$actual" -eq "$expected"
+
+      - name: Prove the container isolation
+        run: scripts/carousel.sh selftest
+
+      - name: Scan the repository for vulnerabilities
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          exit-code: "1"
+          ignore-unfixed: "false"
