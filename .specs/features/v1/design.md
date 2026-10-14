@@ -38,7 +38,7 @@ Tudo roda em `scripts/carousel.sh`, que usa `docker run` com `--network none`, `
 | Temas | `dark` (padrão) e `light`, cor de destaque configurável em `meta.accent` | RND-05 e RND-11. |
 | Formatos | `linkedin-square` 1080x1080 (padrão) e `linkedin-portrait` 1080x1350 | Assumption da spec. |
 | Licenças | Projeto MIT. Satori e resvg-wasm são MPL-2.0: usados como dependência sem modificar, o que é compatível. Registrado em `docs/dependencies.md`. | Transparência. |
-| Dependências diretas | satori e @resvg/resvg-wasm (2 de no máximo 4). O Satori traz 12 transitivas (fflate, harfbuzzjs e outras), todas listadas na T32 com as licenças. | SEC-06. |
+| Dependências diretas | satori e @resvg/resvg-wasm (2 de no máximo 4). O Satori declara 12 dependências diretas e o fechamento dele chega a 21 pacotes (medido na T32), todos listados em docs/dependencies.md com as licenças. | SEC-06. |
 | Exemplo da documentação | Carrossel fictício rotulado como exemplo, sem números reais de terceiros | Os números do artigo da Anthropic vieram de um resumo automático e não vão para um repositório público. |
 | CI | Actions fixadas por SHA, reaproveitando as três do fork (checkout, setup-bun, trivy-action), reverificadas na T29 | SEC-03. |
 | Isolamento | `scripts/carousel.sh` com `--network none --read-only --cap-drop ALL --security-opt no-new-privileges`, código `:ro` e só `out/` gravável | SEC-07 e RND-07. |

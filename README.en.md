@@ -132,7 +132,7 @@ To report a vulnerability, see [SECURITY.md](SECURITY.md).
 Facts verified on 2026-10-14. They may have changed since. We say nothing about the quality, popularity or security of these projects.
 
 - [ContentHub](https://github.com/thallisribeiro/contenthub): has a factual gate in its flow and its carousel is for Instagram. We did not find a `.github` folder (no CI) in the repository.
-- [threads-carousel-claude-skill](https://github.com/itchernetski/threads-carousel-claude-skill) (MIT license, in the LICENSE file): generates a carousel with a browser preview (Next.js) and the export is done in the browser, in formats for several networks. This project started from a security audit of it and reuses ideas and parts of the validator and font code from an audited fork, under the MIT license.
+- [threads-carousel-claude-skill](https://github.com/itchernetski/threads-carousel-claude-skill) (MIT license, in the LICENSE file): generates a carousel with a browser preview (Next.js) and the export is done in the browser, in formats for several networks. This project started from a security audit of it: the validator rules and the idea of running everything in a container come from that work. The code was rewritten for this repository (only the number regular expression and the format of a finding line are the same).
 - [Slashgear/linkedin-carousel-gen](https://github.com/Slashgear/linkedin-carousel-gen): MIT, uses Satori and Bun to generate LinkedIn carousel PDFs.
 
 ## License and credits
