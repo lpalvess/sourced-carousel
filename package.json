@@ -1,0 +1,20 @@
+{
+  "name": "sourced-carousel",
+  "version": "0.1.0",
+  "description": "LinkedIn carousel PDFs where every number traces back to a facts file. Offline, no browser, auditable.",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "bun test",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@resvg/resvg-wasm": "2.6.2",
+    "satori": "0.57.2"
+  },
+  "devDependencies": {
+    "@types/bun": "1.4.3",
+    "typescript": "5.9.3"
+  }
+}
