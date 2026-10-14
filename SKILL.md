@@ -134,4 +134,5 @@ Se o texto for grande demais para caber, o render reduz a fonte até o mínimo e
 - O texto do PDF vira imagem e não é selecionável.
 - O ajuste de texto é uma estimativa conservadora.
 - Um gancho de 3 linhas pode quebrar em mais linhas ao renderizar. Confira o PNG.
+- Só são conferidas as unidades da lista (`%`, `x`, `×`, `K`, `k`, `M`, `B`, `mil`, `mi`, `bi`, `milhão`, `milhões`, `bilhão`, `bilhões`, `thousand`, `million`, `billion`). Outra unidade (`5 pp`, `2 trilhões`, `15 por cento`) não é conferida: escreva o número com uma unidade da lista ou sem unidade. Milhar com espaço (`1 000 000`), notação científica (`1e3`) e dígitos colados a letras (`Q4`, `10h30`) também não são conferidos.
 - Sem imagens nos slides e sem editor visual.

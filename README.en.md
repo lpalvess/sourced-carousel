@@ -121,6 +121,9 @@ To report a vulnerability, see [SECURITY.md](SECURITY.md).
 - A 3-line hook may wrap onto more lines when rendered. Check the PNGs.
 - Only two formats (LinkedIn square and portrait) and two themes.
 - The validator only checks numbers written with digits. A spelled out number ("thirty thousand") is not checked: always write numbers with digits.
+- Only the units in the list are checked (`%`, `x`, `×`, `K`, `k`, `M`, `B`, `mil`, `mi`, `bi`, `milhão`, `milhões`, `bilhão`, `bilhões`, `thousand`, `million`, `billion`). Any other unit (`5 pp`, `2 trilhões`, `15 por cento`) is not checked: write the number with a unit from the list or with none.
+- A thousands separator with spaces (`1 000 000`) and scientific notation (`1e3`) are not checked as a single number.
+- Digits glued to letters (`Q4`, `10h30`, `ISO27001`) are not checked.
 - The validator confirms that the number came from the facts file, not that the quote is right in the source. That part is up to you.
 - The static security test in `tests/security-static.test.ts` is a pattern heuristic over `src/`. The real defense is the container without network.
 
@@ -136,7 +139,7 @@ To report a vulnerability, see [SECURITY.md](SECURITY.md).
 Facts verified on 2026-10-14. They may have changed since. We say nothing about the quality, popularity or security of these projects.
 
 - [ContentHub](https://github.com/thallisribeiro/contenthub): has a factual gate in its flow and its carousel is for Instagram. We did not find a `.github` folder in the repository (this says nothing about other ways of having CI).
-- [threads-carousel-claude-skill](https://github.com/itchernetski/threads-carousel-claude-skill) (MIT license, in the LICENSE file): generates a carousel with a browser preview (Next.js) and the export is done in the browser, in formats for several networks. This project started from a security audit of it: the validator rules and the idea of running everything in a container come from that work. The code was rewritten for this repository (only the number regular expression and the format of a finding line are the same).
+- [threads-carousel-claude-skill](https://github.com/itchernetski/threads-carousel-claude-skill) (MIT license, in the LICENSE file): generates a carousel with a browser preview (Next.js) and the export is done in the browser, in formats for several networks. This project started from a security audit of it. The code was written for this repository, from the specification.
 - [Slashgear/linkedin-carousel-gen](https://github.com/Slashgear/linkedin-carousel-gen): MIT, uses Satori and Bun to generate LinkedIn carousel PDFs.
 
 ## License and credits

@@ -121,6 +121,9 @@ Para reportar uma vulnerabilidade, veja [SECURITY.md](SECURITY.md).
 - Um gancho de 3 linhas pode quebrar em mais linhas ao renderizar. Confira os PNGs.
 - Só dois formatos (LinkedIn quadrado e retrato) e dois temas.
 - O validador só confere números escritos com dígitos. Um número por extenso ("trinta mil") não é conferido: escreva sempre com dígitos.
+- Só são conferidas as unidades da lista (`%`, `x`, `×`, `K`, `k`, `M`, `B`, `mil`, `mi`, `bi`, `milhão`, `milhões`, `bilhão`, `bilhões`, `thousand`, `million`, `billion`). Outra unidade (`5 pp`, `2 trilhões`, `15 por cento`) não é conferida: escreva o número com uma unidade da lista ou sem unidade.
+- Milhar com espaço (`1 000 000`) e notação científica (`1e3`) não são conferidos como um número só.
+- Dígitos colados a letras (`Q4`, `10h30`, `ISO27001`) não são conferidos.
 - O validador confere que o número veio do arquivo de fatos, não que o trecho está certo na fonte. Isso é com você.
 - O teste estático de segurança em `tests/security-static.test.ts` é uma heurística de padrões em `src/`. A defesa real é o container sem rede.
 
@@ -136,7 +139,7 @@ Para reportar uma vulnerabilidade, veja [SECURITY.md](SECURITY.md).
 Fatos verificados em 2026-10-14. Podem ter mudado depois dessa data. Não dizemos nada sobre qualidade, popularidade ou segurança desses projetos.
 
 - [ContentHub](https://github.com/thallisribeiro/contenthub): tem um gate factual no fluxo e o carrossel dele é para Instagram. Não encontramos uma pasta `.github` no repositório (isso não diz nada sobre outros jeitos de ter CI).
-- [threads-carousel-claude-skill](https://github.com/itchernetski/threads-carousel-claude-skill) (licença MIT, no arquivo LICENSE): gera carrossel com prévia em navegador (Next.js) e a exportação é feita no navegador, em formatos de várias redes. Este projeto nasceu de uma auditoria de segurança dele: as regras do validador e a ideia de rodar tudo em container vêm desse trabalho. O código foi reescrito para este repositório (só a expressão regular de número e o formato da linha de achado coincidem).
+- [threads-carousel-claude-skill](https://github.com/itchernetski/threads-carousel-claude-skill) (licença MIT, no arquivo LICENSE): gera carrossel com prévia em navegador (Next.js) e a exportação é feita no navegador, em formatos de várias redes. Este projeto nasceu de uma auditoria de segurança dele. O código foi escrito para este repositório, a partir da especificação.
 - [Slashgear/linkedin-carousel-gen](https://github.com/Slashgear/linkedin-carousel-gen): MIT, usa Satori e Bun para gerar PDFs de carrossel do LinkedIn.
 
 ## Licença e créditos
