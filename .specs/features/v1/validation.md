@@ -52,10 +52,13 @@ Os dois primeiros lançamentos de mutação desta rodada foram descartados: a c�
 - O teste estático de segurança é uma heurística; a defesa real é o contêiner sem rede.
 - O texto do PDF vira imagem e não é selecionável.
 
+## Teste de ponta a ponta da skill
+
+Em 2026-10-14, num clone novo do repositório público, com a skill instalada em `.claude/skills/sourced-carousel/`, rodou-se `claude -p` com `--setting-sources project` (sem configurações nem hooks do usuário), `--strict-mcp-config` (sem MCP), modelo Sonnet e ferramentas limitadas a Skill, Read, Write, Edit, Glob, Grep e `Bash(scripts/carousel.sh:*)`. Pedido: um carrossel a partir de `post.md` e `fatos.md`, com o plano pré-aprovado. Resultado: 5 slides, `out/carousel.pdf` com 5 páginas, só números do arquivo de fatos, nada publicado. Conferido por fora: o `slides.json` gerado valida com código 0 e os PNGs estão legíveis. Ressalva: o `CLAUDE.md` global do usuário ainda é carregado nesse modo, então a sessão não é totalmente limpa. O teste revelou que o README não dizia como instalar a skill; corrigido.
+
 ## Não verificado
 
 - O workflow de CI nunca rodou no GitHub. A primeira execução real acontece no primeiro push.
-- A skill num Claude Code limpo, pedindo um carrossel de ponta a ponta.
 - Windows e macOS.
 
 ## Intervalo

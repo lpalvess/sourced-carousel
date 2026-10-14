@@ -23,6 +23,17 @@ scripts/carousel.sh setup      # instala as dependências no container; único p
 scripts/carousel.sh selftest   # prova que o container não tem rede e não escreve fora de out
 ```
 
+### Usar como skill do Claude Code
+
+A skill roda os scripts do próprio repositório, então abra o Claude Code dentro da pasta clonada e instale o `SKILL.md` como skill do projeto:
+
+```
+mkdir -p .claude/skills/sourced-carousel
+cp SKILL.md .claude/skills/sourced-carousel/SKILL.md
+```
+
+Depois peça, por exemplo: "faça um carrossel deste post usando os fatos de fatos.md". A skill propõe o plano dos slides, espera sua aprovação, valida, gera o PDF em `out/` e nunca publica nada.
+
 ## Exemplo completo
 
 Os arquivos em `examples/` são FICTÍCIOS: uma empresa inventada, números inventados e um link de exemplo.
