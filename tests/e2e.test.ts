@@ -87,7 +87,7 @@ describe("exit codes through the real process", () => {
   test("validate: 0 for a clean deck, 1 for a forbidden character", async () => {
     const ok = await setup(DECK);
     expect((await run(["validate", ok.slides])).code).toBe(0);
-    const bad = await setup({ slides: [...DECK.slides.slice(0, 2), { type: "text", title: "T", text: "tem — aqui" }, ...DECK.slides.slice(2)] });
+    const bad = await setup({ slides: [...DECK.slides.slice(0, 2), { type: "text", title: "T", text: "tem \u2014 aqui" }, ...DECK.slides.slice(2)] });
     const r = await run(["validate", bad.slides]);
     expect(r.code).toBe(1);
     expect(r.stdout).toContain("forbidden-char");

@@ -31,7 +31,7 @@ const ls = async (dir: string) => (await readdir(dir)).sort();
 describe("RND-01 validation runs first", () => {
   test("a validation error stops with code 1 and writes nothing", async () => {
     const dir = await workdir();
-    const bad = { slides: [...GOOD_DECK.slides.slice(0, 2), { type: "text", title: "T", text: "tem — travessão" }, ...GOOD_DECK.slides.slice(2)] };
+    const bad = { slides: [...GOOD_DECK.slides.slice(0, 2), { type: "text", title: "T", text: "tem \u2014 travessão" }, ...GOOD_DECK.slides.slice(2)] };
     const slides = await write(dir, "slides.json", JSON.stringify(bad));
     const out = join(dir, "out");
     const r = await runRender([slides, "--out", out]);
