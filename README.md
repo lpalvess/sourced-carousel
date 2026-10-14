@@ -139,7 +139,7 @@ Para reportar uma vulnerabilidade, veja [SECURITY.md](SECURITY.md).
 Fatos verificados em 2026-10-14. Podem ter mudado depois dessa data. Não dizemos nada sobre qualidade, popularidade ou segurança desses projetos.
 
 - [ContentHub](https://github.com/thallisribeiro/contenthub): tem um gate factual no fluxo e o carrossel dele é para Instagram. Não encontramos uma pasta `.github` no repositório (isso não diz nada sobre outros jeitos de ter CI).
-- [threads-carousel-claude-skill](https://github.com/itchernetski/threads-carousel-claude-skill) (licença MIT, no arquivo LICENSE): gera carrossel com prévia em navegador (Next.js) e a exportação é feita no navegador, em formatos de várias redes. Este projeto nasceu de uma auditoria de segurança dele. O código foi escrito para este repositório, a partir da especificação.
+- [threads-carousel-claude-skill](https://github.com/itchernetski/threads-carousel-claude-skill) (licença MIT, no arquivo LICENSE): gera carrossel com prévia em navegador (Next.js) e a exportação é feita no navegador. Este projeto nasceu de uma auditoria de segurança dele.
 - [Slashgear/linkedin-carousel-gen](https://github.com/Slashgear/linkedin-carousel-gen): MIT, usa Satori e Bun para gerar PDFs de carrossel do LinkedIn.
 
 ## Licença e créditos
