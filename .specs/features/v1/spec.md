@@ -112,7 +112,7 @@ Geradores de carrossel para LinkedIn transformam texto em slides, mas nenhum dos
 3. The workflows SHALL referenciar toda action de terceiros por SHA completo de commit, com a tag em comentário, e SHALL declarar `permissions: contents: read`.
 4. The dependabot.yml SHALL cobrir os ecossistemas `bun` e `github-actions`, semanal, com minor e patch agrupados.
 5. The repositório SHALL ter SECURITY.md com como reportar vulnerabilidade, LICENSE MIT e THIRD_PARTY_FONTS.md com o texto da licença de cada fonte.
-6. The projeto SHALL ter no máximo 4 dependências de runtime, e cada uma SHALL estar registrada em `docs/dependencies.md` com versão, licença, scripts de instalação e o resultado da auditoria.
+6. The projeto SHALL ter no máximo 4 dependências diretas de runtime, SHALL listar em `docs/dependencies.md` cada dependência direta e transitiva com versão, licença e scripts de instalação, e SHALL registrar o resultado da auditoria de cada direta.
 7. The projeto SHALL NOT enviar telemetria nem fazer requisição de rede em tempo de execução.
 
 **Independent Test**: abrir um PR com uma dependência vulnerável de propósito e ver o CI falhar; rodar a geração com rede desligada e ver sucesso.
@@ -165,47 +165,47 @@ Geradores de carrossel para LinkedIn transformam texto em slides, mas nenhum dos
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| VAL-01 | P1: Validar | Design | Pending |
-| VAL-02 | P1: Validar | Design | Pending |
-| VAL-03 | P1: Validar | Design | Pending |
-| VAL-04 | P1: Validar | Design | Pending |
-| VAL-05 | P1: Validar | Design | Pending |
-| VAL-06 | P1: Validar | Design | Pending |
-| VAL-07 | P1: Validar | Design | Pending |
-| VAL-08 | P1: Validar | Design | Pending |
-| VAL-09 | P1: Validar | Design | Pending |
-| VAL-10 | P1: Validar | Design | Pending |
-| VAL-11 | P1: Validar | Design | Pending |
-| VAL-12 | P1: Validar | Design | Pending |
-| VAL-13 | P1: Validar | Design | Pending |
-| VAL-14 | P1: Validar | Design | Pending |
-| RND-01 | P1: Gerar | Design | Pending |
-| RND-02 | P1: Gerar | Design | Pending |
-| RND-03 | P1: Gerar | Design | Pending |
-| RND-04 | P1: Gerar | Design | Pending |
-| RND-05 | P1: Gerar | Design | Pending |
-| RND-06 | P1: Gerar | Design | Pending |
-| RND-07 | P1: Gerar | Design | Pending |
-| RND-08 | P1: Gerar | Design | Pending |
-| RND-09 | P1: Gerar | Design | Pending |
-| RND-10 | P1: Gerar | Design | Pending |
-| RND-11 | P1: Gerar | Design | Pending |
-| SEC-01 | P2: Repositório seguro | Design | Pending |
-| SEC-02 | P2: Repositório seguro | Design | Pending |
-| SEC-03 | P2: Repositório seguro | Design | Pending |
-| SEC-04 | P2: Repositório seguro | Design | Pending |
-| SEC-05 | P2: Repositório seguro | Design | Pending |
-| SEC-06 | P2: Repositório seguro | Design | Pending |
-| SEC-07 | P2: Repositório seguro | Design | Pending |
-| DOC-01 | P2: Skill e documentação | Design | Pending |
-| DOC-02 | P2: Skill e documentação | Design | Pending |
-| DOC-03 | P2: Skill e documentação | Design | Pending |
-| DOC-04 | P2: Skill e documentação | Design | Pending |
-| DOC-05 | P2: Skill e documentação | Design | Pending |
+| VAL-01 | P1: Validar | Design | In Tasks |
+| VAL-02 | P1: Validar | Design | In Tasks |
+| VAL-03 | P1: Validar | Design | In Tasks |
+| VAL-04 | P1: Validar | Design | In Tasks |
+| VAL-05 | P1: Validar | Design | In Tasks |
+| VAL-06 | P1: Validar | Design | In Tasks |
+| VAL-07 | P1: Validar | Design | In Tasks |
+| VAL-08 | P1: Validar | Design | In Tasks |
+| VAL-09 | P1: Validar | Design | In Tasks |
+| VAL-10 | P1: Validar | Design | In Tasks |
+| VAL-11 | P1: Validar | Design | In Tasks |
+| VAL-12 | P1: Validar | Design | In Tasks |
+| VAL-13 | P1: Validar | Design | In Tasks |
+| VAL-14 | P1: Validar | Design | In Tasks |
+| RND-01 | P1: Gerar | Design | In Tasks |
+| RND-02 | P1: Gerar | Design | In Tasks |
+| RND-03 | P1: Gerar | Design | In Tasks |
+| RND-04 | P1: Gerar | Design | In Tasks |
+| RND-05 | P1: Gerar | Design | In Tasks |
+| RND-06 | P1: Gerar | Design | In Tasks |
+| RND-07 | P1: Gerar | Design | In Tasks |
+| RND-08 | P1: Gerar | Design | In Tasks |
+| RND-09 | P1: Gerar | Design | In Tasks |
+| RND-10 | P1: Gerar | Design | In Tasks |
+| RND-11 | P1: Gerar | Design | In Tasks |
+| SEC-01 | P2: Repositório seguro | Design | In Tasks |
+| SEC-02 | P2: Repositório seguro | Design | In Tasks |
+| SEC-03 | P2: Repositório seguro | Design | In Tasks |
+| SEC-04 | P2: Repositório seguro | Design | In Tasks |
+| SEC-05 | P2: Repositório seguro | Design | In Tasks |
+| SEC-06 | P2: Repositório seguro | Design | In Tasks |
+| SEC-07 | P2: Repositório seguro | Design | In Tasks |
+| DOC-01 | P2: Skill e documentação | Design | In Tasks |
+| DOC-02 | P2: Skill e documentação | Design | In Tasks |
+| DOC-03 | P2: Skill e documentação | Design | In Tasks |
+| DOC-04 | P2: Skill e documentação | Design | In Tasks |
+| DOC-05 | P2: Skill e documentação | Design | In Tasks |
 
 **ID format:** `[CATEGORY]-[NUMBER]`. Os ACs de cada story são numerados na ordem: P1 Validar = VAL-01 a VAL-14, P1 Gerar = RND-01 a RND-11, P2 Repositório seguro = SEC-01 a SEC-07, P2 Skill = DOC-01 a DOC-05.
 
-**Coverage:** 37 total, 0 mapped to tasks, 37 unmapped.
+**Coverage:** 37 total, 37 mapped to tasks, 0 unmapped.
 
 ---
 
@@ -214,4 +214,4 @@ Geradores de carrossel para LinkedIn transformam texto em slides, mas nenhum dos
 - [ ] O carrossel do post da Anthropic sai em PDF a partir do slides.json e do arquivo de fatos, no container sem rede, com rodapé de fonte nos slides de número.
 - [ ] Um slides.json com número fora dos fatos nunca gera PDF.
 - [ ] O primeiro push público já tem CI verde e Dependabot ativo.
-- [ ] Nenhuma dependência de runtime além das 4 auditadas.
+- [ ] Nenhuma dependência direta de runtime além das 4 auditadas, e todas as transitivas listadas.
