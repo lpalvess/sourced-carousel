@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { parseDeck } from "../src/schema";
-import { parseAndValidate, validate } from "../src/validate";
+import { FORBIDDEN, parseAndValidate, validate } from "../src/validate";
 import type { RawDeck } from "../src/validate";
 
 /** A clean deck, with one slide replaced by `slide`. */
@@ -223,5 +223,19 @@ describe("round 2 findings: units, signs, versions and capitals", () => {
   test("a capitalized unit matches the same unit in lower case in the facts", () => {
     expect(rulesOf(with_("Cerca de 4 Milhões de pessoas"), "4 milhões de pessoas")).toEqual([]);
     expect(rulesOf(with_("Cerca de 4 Milhões de pessoas"), "4 mil pessoas")).toEqual(["number-not-in-facts"]);
+  });
+});
+
+describe("VAL-08 every required forbidden sequence is rejected", () => {
+  // A fixed list written here, not read from the module, so removing an entry from the
+  // source cannot remove it from this test too.
+  const REQUIRED = ["\u2012", "\u2013", "\u2014", "\u2015", "\uFE58", "\uFF0D", "\u2192", "\u21D2", "->", "=>", "<-"];
+  for (const seq of REQUIRED) {
+    test(`${seq.codePointAt(0)?.toString(16).toUpperCase() ?? seq} inside a text is rejected`, () => {
+      expect(rulesOf(deckWith({ type: "text", title: "T", text: `antes ${seq} depois` }))).toContain("forbidden-char");
+    });
+  }
+  test("the module's list covers every required sequence", () => {
+    for (const seq of REQUIRED) expect(FORBIDDEN).toContain(seq);
   });
 });
