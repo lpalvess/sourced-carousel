@@ -1,0 +1,43 @@
+{
+  "meta": { "theme": "dark", "format": "linkedin-square" },
+  "slides": [
+    {
+      "type": "hook",
+      "text": "E se a reunião semanal\nfosse só um texto?",
+      "highlight": "texto"
+    },
+    {
+      "type": "number",
+      "value": "42%",
+      "label": "menos tempo gasto em reuniões de status (dado fictício)",
+      "source": "Fonte: exemplo da documentação"
+    },
+    {
+      "type": "text",
+      "title": "Como foi o piloto",
+      "text": "Durante 8 semanas, o time da empresa fictícia Exemplo S.A. trocou a reunião de status por uma nota escrita de 1 página, lida quando cada pessoa pudesse.",
+      "highlight": "nota escrita",
+      "source": "Fonte: exemplo da documentação"
+    },
+    {
+      "type": "list",
+      "title": "O que mudou na rotina",
+      "items": [
+        "Decisões ficam registradas por escrito",
+        "Quem estava ausente consegue acompanhar",
+        "A reunião só acontece quando há um impasse"
+      ],
+      "highlight": "registradas"
+    },
+    {
+      "type": "quote",
+      "text": "Ler leva menos tempo do que esperar a vez de falar.",
+      "author": "Pessoa fictícia, Exemplo S.A."
+    },
+    {
+      "type": "cta",
+      "text": "Este carrossel é um exemplo. Teste a ideia no seu time.",
+      "handle": "@exemplo"
+    }
+  ]
+}
