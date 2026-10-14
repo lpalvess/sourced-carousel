@@ -17,8 +17,11 @@ const REQUIRED_STRINGS: Record<string, readonly string[]> = {
   cta: ["text", "handle"],
 };
 
+/** Whitespace and zero width characters, which show nothing. */
+const INVISIBLE = /[\s\u200B-\u200D\u2060\uFEFF]/gu;
+
 function isBlank(value: unknown): boolean {
-  return typeof value !== "string" || value.trim() === "";
+  return typeof value !== "string" || value.replace(INVISIBLE, "") === "";
 }
 
 function err(slide: number, rule: string, message: string): Finding {
@@ -83,15 +86,30 @@ function countWords(s: string): number {
   return t === "" ? 0 : t.split(/\s+/).length;
 }
 
-/** Visible text a highlight may point into. */
-function highlightHaystack(slide: Record<string, unknown>): string[] {
+/**
+ * Fields the layout of each type actually draws the highlight in. A highlight that
+ * only exists in another field (the quote author, the cta handle) would be accepted
+ * but never drawn, so it is not searched.
+ */
+const HIGHLIGHT_FIELDS: Record<string, readonly string[]> = {
+  hook: ["text"],
+  text: ["title", "text"],
+  number: ["value", "label"],
+  list: ["title"],
+  quote: ["text"],
+  cta: ["text"],
+};
+
+function highlightHaystack(slide: Record<string, unknown>, type: string): string[] {
   const out: string[] = [];
-  for (const key of ["title", "text", "value", "label", "author"]) {
+  for (const key of HIGHLIGHT_FIELDS[type] ?? []) {
     const v = ownProp(slide, key);
     if (typeof v === "string") out.push(v);
   }
-  const items = ownProp(slide, "items");
-  if (Array.isArray(items)) for (const it of items) if (typeof it === "string") out.push(it);
+  if (type === "list") {
+    const items = ownProp(slide, "items");
+    if (Array.isArray(items)) for (const it of items) if (typeof it === "string") out.push(it);
+  }
   return out;
 }
 
@@ -115,7 +133,7 @@ function checkContent(n: number, slide: Record<string, unknown>, type: string): 
     const words = countWords(highlight);
     if (words === 0 || words > MAX_HIGHLIGHT_WORDS) {
       out.push(err(n, "highlight-invalid", `slide ${n} highlight has ${words} words, it must have 1 to ${MAX_HIGHLIGHT_WORDS}`));
-    } else if (!highlightHaystack(slide).some((t) => t.includes(highlight))) {
+    } else if (!highlightHaystack(slide, type).some((t) => t.includes(highlight))) {
       out.push(err(n, "highlight-invalid", `slide ${n} highlight "${highlight}" does not appear in the slide text`));
     }
   }
@@ -129,8 +147,23 @@ function checkContent(n: number, slide: Record<string, unknown>, type: string): 
   return out;
 }
 
-/** Characters and sequences that must never appear, written as escapes. */
-export const FORBIDDEN: readonly string[] = ["\u2014", "\u2013", "\u2192", "\u21D2", "\u002D\u003E"];
+/** Dashes and arrow sequences that must never appear, written as escapes. */
+export const FORBIDDEN: readonly string[] = [
+  "\u2012", // figure dash
+  "\u2013", // en dash
+  "\u2014", // em dash
+  "\u2015", // horizontal bar
+  "\uFE58", // small em dash
+  "\uFF0D", // fullwidth hyphen-minus
+  "\u2192", // rightwards arrow
+  "\u21D2", // rightwards double arrow
+  "\u002D\u003E", // hyphen and greater-than
+  "\u003D\u003E", // equals and greater-than
+  "\u003C\u002D", // less-than and hyphen
+];
+
+/** Arrow blocks: arrows, dingbat arrows, long arrows, supplemental arrows and misc symbols arrows. */
+const ARROW_CHARS = /[\u2190-\u21FF\u2794-\u27BF\u27F0-\u27FF\u2900-\u297F\u2B00-\u2B11\u2B30-\u2B4F\u2B60-\u2BAF]/gu;
 
 /** Every visible string of a slide, including list items and source. */
 function allTexts(slide: Record<string, unknown>): string[] {
@@ -153,19 +186,50 @@ function describeForbidden(seq: string): string {
 function checkForbidden(n: number, slide: Record<string, unknown>): Finding[] {
   const texts = allTexts(slide);
   const out: Finding[] = [];
+  const reported = new Set<string>();
   for (const seq of FORBIDDEN) {
     if (texts.some((t) => t.includes(seq))) {
+      reported.add(seq);
       out.push(err(n, "forbidden-char", `slide ${n} contains the forbidden character ${describeForbidden(seq)}`));
+    }
+  }
+  for (const t of texts) {
+    for (const m of t.matchAll(ARROW_CHARS)) {
+      if (reported.has(m[0])) continue;
+      reported.add(m[0]);
+      out.push(err(n, "forbidden-char", `slide ${n} contains the forbidden character ${describeForbidden(m[0])}`));
     }
   }
   return out;
 }
 
-/** Numbers with optional separators and a unit, as written in the slide. */
-const NUMBER_RE = /\d+(?:[.,]\d+)*(?:\s?(?:%|x|\u00D7|k|M))?/g;
+/**
+ * A unit or magnitude written right after a number. It is part of the number:
+ * 42 and 42% are different claims, and so are 5K and "5 mil". The boundary at the
+ * end keeps "5 minutos" from being read as 5 "mi".
+ */
+const UNIT = String.raw`(?:%|x|\u00D7|k|K|M|B|milh(?:\u00E3o|\u00F5es)|bilh(?:\u00E3o|\u00F5es)|thousand|million|billion|mil|mi|bi)(?![\p{L}\p{N}])`;
 
-/** Distinct numbers in the checked text of a slide. source and highlight are left out. */
-function numbersIn(slide: Record<string, unknown>): string[] {
+/**
+ * A number as written: optional sign, digits with . or , separators, optional unit.
+ * A sign only counts when it is not glued to a letter or digit, so 2020-2021 is two
+ * plain numbers and -3% is one signed number.
+ */
+const NUMBER_RE = new RegExp(String.raw`(?<![\p{L}\p{N}])[-+]?\d+(?:[.,]\d+)*(?:\s?${UNIT})?`, "gu");
+
+/** Compatibility forms (full-width digits, no-break spaces) read as their plain equivalents. */
+function normalizeText(text: string): string {
+  return text
+    .normalize("NFKC")
+    .replace(/\u2212/gu, "-")
+    .replace(/[\u200B-\u200D\u2060\uFEFF]/gu, "");
+}
+
+/** Decimal digits other than 0-9 that survive normalization, such as Arabic-Indic digits. */
+const FOREIGN_DIGIT = /(?![0-9])\p{Nd}/u;
+
+/** The text fields whose numbers are claims. source and highlight are left out. */
+function numberFields(slide: Record<string, unknown>): string[] {
   const texts: string[] = [];
   for (const key of ["text", "title", "value", "label", "author", "handle"]) {
     const v = ownProp(slide, key);
@@ -173,9 +237,27 @@ function numbersIn(slide: Record<string, unknown>): string[] {
   }
   const items = ownProp(slide, "items");
   if (Array.isArray(items)) for (const it of items) if (typeof it === "string") texts.push(it);
+  return texts.map(normalizeText);
+}
+
+/** Distinct numbers in the checked text of a slide. */
+function numbersIn(slide: Record<string, unknown>): string[] {
   const found = new Set<string>();
-  for (const t of texts) for (const m of t.matchAll(NUMBER_RE)) found.add(m[0]);
+  for (const t of numberFields(slide)) for (const m of t.matchAll(NUMBER_RE)) found.add(m[0]);
   return [...found];
+}
+
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+}
+
+/**
+ * True when the facts contain the number as a whole: not glued to more digits or to a
+ * decimal part before or after, and with the same unit. 42% is not in "142%" or "42".
+ */
+function factsContain(facts: string, token: string): boolean {
+  const re = new RegExp(String.raw`(?<!\d|\d[.,])${escapeRegExp(token)}(?!\d|[.,]\d|\s?${UNIT})`, "u");
+  return re.test(facts);
 }
 
 /** Runs every rule over a parsed deck. Findings come back ordered by slide. */
@@ -227,6 +309,9 @@ export function validate(deck: RawDeck, opts?: { facts?: string }): Finding[] {
     if (!isRecord(raw)) return;
     const type = ownProp(raw, "type");
     if (typeof type !== "string" || !(SLIDE_TYPES as readonly string[]).includes(type)) return;
+    if (numberFields(raw).some((t) => FOREIGN_DIGIT.test(t))) {
+      findings.push(err(n, "non-ascii-digit", `slide ${n} has digits that are not 0-9, which cannot be compared with the facts file`));
+    }
     const numbers = numbersIn(raw);
     if (numbers.length === 0) return;
     if (facts === undefined) {
@@ -236,8 +321,9 @@ export function validate(deck: RawDeck, opts?: { facts?: string }): Finding[] {
       }
       return;
     }
+    const normalizedFacts = normalizeText(facts);
     for (const num of numbers) {
-      if (!facts.includes(num)) {
+      if (!factsContain(normalizedFacts, num)) {
         findings.push(err(n, "number-not-in-facts", `slide ${n} has the number "${num}" which is not in the facts file`));
       }
     }

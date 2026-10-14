@@ -35,7 +35,8 @@ function invalid(message: string): { findings: Finding[] } {
 export function parseDeck(text: string): { deck: RawDeck } | { findings: Finding[] } {
   let data: unknown;
   try {
-    data = JSON.parse(text);
+    // Editors on Windows often save a byte order mark, which JSON.parse rejects.
+    data = JSON.parse(text.replace(/^\uFEFF/, ""));
   } catch (err) {
     const detail = err instanceof Error ? err.message : "unknown parse error";
     return invalid(`$: not valid JSON (${detail})`);

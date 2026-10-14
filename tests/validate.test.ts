@@ -441,8 +441,9 @@ describe("number-not-in-facts (VAL-12)", () => {
     expect(nums([hook(), text({ text: "Cost 2,5" }), cta()], "cost 2,5")).toHaveLength(0);
   });
 
-  test("the match is a plain substring, so the number may sit inside a longer token", () => {
-    expect(nums([hook(), text({ text: "Only 25" }), cta()], "row 2500 of the table")).toHaveLength(0);
+  test("the match is on the whole number, so a number inside a longer one does not count", () => {
+    expect(nums([hook(), text({ text: "Only 25" }), cta()], "row 2500 of the table")).toHaveLength(1);
+    expect(nums([hook(), text({ text: "Only 25" }), cta()], "row 25 of the table")).toHaveLength(0);
   });
 
   test("the source field is outside the number check", () => {
