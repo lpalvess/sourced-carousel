@@ -47,7 +47,7 @@ export function highlightFirst(texts: readonly string[], highlight: string | und
  * flow around a highlighted span. Block keeps the text and span inline.
  */
 export function textBlock(style: Record<string, string | number>, parts: SatoriChild[]): SatoriNode {
-  return el("div", { display: "block", ...style }, parts);
+  return el("div", { display: "block", whiteSpace: "pre-wrap", ...style }, parts);
 }
 
 /** Root node of a slide: theme background and padding, content on top, footer row at the bottom. */
@@ -77,6 +77,7 @@ export function frame(slide: { source?: string }, ctx: LayoutContext, content: S
     {
       display: "flex",
       flexDirection: "column",
+      boxSizing: "border-box",
       width: ctx.width,
       height: ctx.height,
       padding: tokens.padding,
