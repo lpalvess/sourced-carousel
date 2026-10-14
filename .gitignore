@@ -1,0 +1,15 @@
+# Dependencies
+node_modules/
+
+# Generated carousels
+out/
+
+# Environment and local files
+.env
+.env.*
+*.local
+.DS_Store
+
+# Editors
+.idea/
+.vscode/
