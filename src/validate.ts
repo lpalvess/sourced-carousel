@@ -73,6 +73,62 @@ function checkRequired(n: number, slide: Record<string, unknown>, type: string):
   return out;
 }
 
+export const MAX_TEXT_WORDS = 40;
+export const MAX_HOOK_LINES = 3;
+export const MAX_HIGHLIGHT_WORDS = 2;
+export const MAX_SOURCE_CHARS = 80;
+
+function countWords(s: string): number {
+  const t = s.trim();
+  return t === "" ? 0 : t.split(/\s+/).length;
+}
+
+/** Visible text a highlight may point into. */
+function highlightHaystack(slide: Record<string, unknown>): string[] {
+  const out: string[] = [];
+  for (const key of ["title", "text", "value", "label", "author"]) {
+    const v = ownProp(slide, key);
+    if (typeof v === "string") out.push(v);
+  }
+  const items = ownProp(slide, "items");
+  if (Array.isArray(items)) for (const it of items) if (typeof it === "string") out.push(it);
+  return out;
+}
+
+function checkContent(n: number, slide: Record<string, unknown>, type: string): Finding[] {
+  const out: Finding[] = [];
+  const body = ownProp(slide, "text");
+  if (type === "text" && typeof body === "string") {
+    const words = countWords(body);
+    if (words > MAX_TEXT_WORDS) {
+      out.push(err(n, "too-many-words", `slide ${n} text has ${words} words, the maximum is ${MAX_TEXT_WORDS}`));
+    }
+  }
+  if (type === "hook" && typeof body === "string") {
+    const lines = body.replace(/(\r?\n)+$/, "").split(/\r?\n/).length;
+    if (lines > MAX_HOOK_LINES) {
+      out.push(err(n, "hook-too-long", `slide ${n} hook has ${lines} lines, the maximum is ${MAX_HOOK_LINES}`));
+    }
+  }
+  const highlight = ownProp(slide, "highlight");
+  if (typeof highlight === "string") {
+    const words = countWords(highlight);
+    if (words === 0 || words > MAX_HIGHLIGHT_WORDS) {
+      out.push(err(n, "highlight-invalid", `slide ${n} highlight has ${words} words, it must have 1 to ${MAX_HIGHLIGHT_WORDS}`));
+    } else if (!highlightHaystack(slide).some((t) => t.includes(highlight))) {
+      out.push(err(n, "highlight-invalid", `slide ${n} highlight "${highlight}" does not appear in the slide text`));
+    }
+  }
+  const source = ownProp(slide, "source");
+  if (typeof source === "string") {
+    const chars = [...source].length;
+    if (chars > MAX_SOURCE_CHARS) {
+      out.push(err(n, "source-too-long", `slide ${n} source has ${chars} characters, the maximum is ${MAX_SOURCE_CHARS}`));
+    }
+  }
+  return out;
+}
+
 /** Runs every rule over a parsed deck. Findings come back ordered by slide. */
 export function validate(deck: RawDeck, opts?: { facts?: string }): Finding[] {
   void opts;
@@ -102,6 +158,7 @@ export function validate(deck: RawDeck, opts?: { facts?: string }): Finding[] {
     }
     types.push(type);
     findings.push(...checkRequired(n, raw, type));
+    findings.push(...checkContent(n, raw, type));
   });
 
   if (count > 0) {

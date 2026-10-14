@@ -223,3 +223,120 @@ describe("parseAndValidate", () => {
     expect(r.deck).toBeUndefined();
   });
 });
+
+const words = (n: number) => Array.from({ length: n }, (_, i) => `w${String.fromCharCode(97 + (i % 26))}`).join(" ");
+const mid = (slide: S) => deck([hook(), slide, cta()]);
+
+describe("too-many-words (VAL-05)", () => {
+  test("40 words pass", () => {
+    expect(byRule(validate(mid(text({ text: words(40) }))), "too-many-words")).toHaveLength(0);
+  });
+
+  test("41 words fail on that slide", () => {
+    const f = byRule(validate(mid(text({ text: words(41) }))), "too-many-words");
+    expect(f).toHaveLength(1);
+    expect(f[0]).toMatchObject({ severity: "error", slide: 2 });
+  });
+
+  test("words are separated by any whitespace, including newlines and tabs", () => {
+    const t = Array.from({ length: 41 }, () => "a").join("\n\t ");
+    expect(byRule(validate(mid(text({ text: t }))), "too-many-words")).toHaveLength(1);
+  });
+
+  test("extra spaces and edges do not add words", () => {
+    const t = `  ${words(40).split(" ").join("   ")}  \n`;
+    expect(byRule(validate(mid(text({ text: t }))), "too-many-words")).toHaveLength(0);
+  });
+
+  test("the limit applies to text slides only", () => {
+    expect(byRule(validate(mid(quote({ text: words(60) }))), "too-many-words")).toHaveLength(0);
+  });
+});
+
+describe("hook-too-long (VAL-06)", () => {
+  test("3 lines pass", () => {
+    expect(byRule(validate(deck([hook({ text: "a\nb\nc" }), text(), cta()])), "hook-too-long")).toHaveLength(0);
+  });
+
+  test("4 lines fail on slide 1", () => {
+    const f = byRule(validate(deck([hook({ text: "a\nb\nc\nd" }), text(), cta()])), "hook-too-long");
+    expect(f).toHaveLength(1);
+    expect(f[0]).toMatchObject({ severity: "error", slide: 1 });
+  });
+
+  test("a trailing line break does not count", () => {
+    expect(byRule(validate(deck([hook({ text: "a\nb\nc\n" }), text(), cta()])), "hook-too-long")).toHaveLength(0);
+  });
+
+  test("CRLF line breaks are counted as one break each", () => {
+    expect(byRule(validate(deck([hook({ text: "a\r\nb\r\nc" }), text(), cta()])), "hook-too-long")).toHaveLength(0);
+    expect(byRule(validate(deck([hook({ text: "a\r\nb\r\nc\r\nd" }), text(), cta()])), "hook-too-long")).toHaveLength(1);
+  });
+
+  test("the limit applies to hooks only", () => {
+    expect(byRule(validate(mid(text({ text: "a\nb\nc\nd\ne" }))), "hook-too-long")).toHaveLength(0);
+  });
+});
+
+describe("highlight-invalid (VAL-07)", () => {
+  test("1 and 2 words present in the text pass", () => {
+    expect(byRule(validate(mid(text({ text: "alpha beta gamma", highlight: "alpha" }))), "highlight-invalid")).toHaveLength(0);
+    expect(byRule(validate(mid(text({ text: "alpha beta gamma", highlight: "alpha beta" }))), "highlight-invalid")).toHaveLength(0);
+  });
+
+  test("3 words fail even when present", () => {
+    const f = byRule(validate(mid(text({ text: "alpha beta gamma", highlight: "alpha beta gamma" }))), "highlight-invalid");
+    expect(f).toHaveLength(1);
+    expect(f[0]).toMatchObject({ severity: "error", slide: 2 });
+  });
+
+  test("a highlight that is not in the slide fails", () => {
+    expect(byRule(validate(mid(text({ highlight: "absent" }))), "highlight-invalid")).toHaveLength(1);
+  });
+
+  test("a highlight found in the title passes", () => {
+    expect(byRule(validate(mid(text({ title: "Big claim", highlight: "claim" }))), "highlight-invalid")).toHaveLength(0);
+  });
+
+  test("works on hook, number, list and quote slides", () => {
+    expect(byRule(validate(deck([hook({ text: "Hello world", highlight: "world" }), text(), cta()])), "highlight-invalid")).toHaveLength(0);
+    expect(byRule(validate(deck([hook({ text: "Hello world", highlight: "nope" }), text(), cta()])), "highlight-invalid")).toHaveLength(1);
+    expect(byRule(validate(mid(num({ label: "times faster", highlight: "faster" }))), "highlight-invalid")).toHaveLength(0);
+    expect(byRule(validate(mid(list({ items: ["red apple", "green pear"], highlight: "pear" }))), "highlight-invalid")).toHaveLength(0);
+    expect(byRule(validate(mid(quote({ text: "Say less", highlight: "less" }))), "highlight-invalid")).toHaveLength(0);
+  });
+
+  test("an empty highlight is invalid", () => {
+    expect(byRule(validate(mid(text({ highlight: "" }))), "highlight-invalid")).toHaveLength(1);
+  });
+
+  test("a non-string highlight is a schema error", () => {
+    expect(byRule(validate(mid(text({ highlight: 5 }))), "schema-invalid")).toHaveLength(1);
+  });
+});
+
+describe("source-too-long (VAL-11)", () => {
+  test("80 characters pass", () => {
+    expect(byRule(validate(mid(text({ source: "a".repeat(80) }))), "source-too-long")).toHaveLength(0);
+  });
+
+  test("81 characters fail on that slide", () => {
+    const f = byRule(validate(mid(text({ source: "a".repeat(81) }))), "source-too-long");
+    expect(f).toHaveLength(1);
+    expect(f[0]).toMatchObject({ severity: "error", slide: 2 });
+  });
+
+  test("80 emoji pass (code points, not UTF-16 units)", () => {
+    const s = "\u{1F600}".repeat(80);
+    expect(s.length).toBe(160);
+    expect(byRule(validate(mid(text({ source: s }))), "source-too-long")).toHaveLength(0);
+  });
+
+  test("81 emoji fail", () => {
+    expect(byRule(validate(mid(text({ source: "\u{1F600}".repeat(81) }))), "source-too-long")).toHaveLength(1);
+  });
+
+  test("a non-string source is a schema error", () => {
+    expect(byRule(validate(mid(text({ source: 5 }))), "schema-invalid")).toHaveLength(1);
+  });
+});
