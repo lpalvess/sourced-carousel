@@ -79,8 +79,9 @@ Each finding is printed as `<severity> slide <N> <rule-id>: <message>`.
 | `hook-too-long` | error | A `hook` with more than 3 lines. |
 | `highlight-invalid` | error | An empty `highlight`, one with more than 2 words, or one that does not appear in the slide. |
 | `source-too-long` | error | A `source` with more than 80 characters. |
-| `forbidden-char` | error | An em dash, en dash or arrow in any text. |
-| `number-not-in-facts` | error | A number outside `source` that is not in the facts file, compared exactly as written. |
+| `forbidden-char` | error | An em dash, an en dash, other dashes (U+2012, U+2015, U+FE58, U+FF0D), any arrow from the Unicode arrow blocks, and the sequences `->`, `=>` and `<-`, in any text. A plain hyphen and the minus sign (U+2212) are allowed. |
+| `number-not-in-facts` | error | A number outside `source` that is not in the facts file. The number is compared whole and as written: `42%` is not in `142%`, nor in `42`; the sign and the unit (`%`, `K`, `mil`, `M`) are part of the number. |
+| `non-ascii-digit` | error | Digits other than 0 to 9 (for example Arabic-Indic), which cannot be compared with the facts file. Full-width digits are converted and accepted. |
 | `structure` | warning | The first slide is not a `hook` or the last is not a `cta`. |
 | `facts-skipped` | warning | There are numbers but `--facts` was not given. |
 
@@ -119,6 +120,9 @@ To report a vulnerability, see [SECURITY.md](SECURITY.md).
 - Text fitting is a conservative estimate. If the text does not fit even at the minimum size, render fails with `text-overflow`.
 - A 3-line hook may wrap onto more lines when rendered. Check the PNGs.
 - Only two formats (LinkedIn square and portrait) and two themes.
+- The validator only checks numbers written with digits. A spelled out number ("thirty thousand") is not checked: always write numbers with digits.
+- The validator confirms that the number came from the facts file, not that the quote is right in the source. That part is up to you.
+- The static security test in `tests/security-static.test.ts` is a pattern heuristic over `src/`. The real defense is the container without network.
 
 ## What this project does not do
 
@@ -131,7 +135,7 @@ To report a vulnerability, see [SECURITY.md](SECURITY.md).
 
 Facts verified on 2026-10-14. They may have changed since. We say nothing about the quality, popularity or security of these projects.
 
-- [ContentHub](https://github.com/thallisribeiro/contenthub): has a factual gate in its flow and its carousel is for Instagram. We did not find a `.github` folder (no CI) in the repository.
+- [ContentHub](https://github.com/thallisribeiro/contenthub): has a factual gate in its flow and its carousel is for Instagram. We did not find a `.github` folder in the repository (this says nothing about other ways of having CI).
 - [threads-carousel-claude-skill](https://github.com/itchernetski/threads-carousel-claude-skill) (MIT license, in the LICENSE file): generates a carousel with a browser preview (Next.js) and the export is done in the browser, in formats for several networks. This project started from a security audit of it: the validator rules and the idea of running everything in a container come from that work. The code was rewritten for this repository (only the number regular expression and the format of a finding line are the same).
 - [Slashgear/linkedin-carousel-gen](https://github.com/Slashgear/linkedin-carousel-gen): MIT, uses Satori and Bun to generate LinkedIn carousel PDFs.
 

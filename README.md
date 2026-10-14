@@ -79,8 +79,9 @@ Cada achado sai como `<severity> slide <N> <rule-id>: <mensagem>`.
 | `hook-too-long` | erro | `hook` com mais de 3 linhas. |
 | `highlight-invalid` | erro | `highlight` vazio, com mais de 2 palavras ou que não aparece no slide. |
 | `source-too-long` | erro | `source` com mais de 80 caracteres. |
-| `forbidden-char` | erro | Travessão longo, meia-risca ou seta em qualquer texto. |
-| `number-not-in-facts` | erro | Número fora de `source` que não está no arquivo de fatos, comparado exatamente como escrito. |
+| `forbidden-char` | erro | Travessão longo, meia-risca, outros traços (U+2012, U+2015, U+FE58, U+FF0D), qualquer seta dos blocos de setas do Unicode, e as sequências `->`, `=>` e `<-`, em qualquer texto. Hífen simples e sinal de menos (U+2212) são permitidos. |
+| `number-not-in-facts` | erro | Número fora de `source` que não está no arquivo de fatos. O número é comparado inteiro e como escrito: `42%` não está em `142%`, nem em `42`; o sinal e a unidade (`%`, `K`, `mil`, `M`) fazem parte do número. |
+| `non-ascii-digit` | erro | Dígitos que não são 0 a 9 (por exemplo árabe-índicos), que não dá para comparar com o arquivo de fatos. Dígitos de largura total são convertidos e aceitos. |
 | `structure` | aviso | O primeiro slide não é `hook` ou o último não é `cta`. |
 | `facts-skipped` | aviso | Há número mas `--facts` não foi informado. |
 
@@ -119,6 +120,9 @@ Para reportar uma vulnerabilidade, veja [SECURITY.md](SECURITY.md).
 - O ajuste de texto é uma estimativa conservadora. Se o texto não couber nem no tamanho mínimo, o render falha com `text-overflow`.
 - Um gancho de 3 linhas pode quebrar em mais linhas ao renderizar. Confira os PNGs.
 - Só dois formatos (LinkedIn quadrado e retrato) e dois temas.
+- O validador só confere números escritos com dígitos. Um número por extenso ("trinta mil") não é conferido: escreva sempre com dígitos.
+- O validador confere que o número veio do arquivo de fatos, não que o trecho está certo na fonte. Isso é com você.
+- O teste estático de segurança em `tests/security-static.test.ts` é uma heurística de padrões em `src/`. A defesa real é o container sem rede.
 
 ## O que este projeto não faz
 
@@ -131,7 +135,7 @@ Para reportar uma vulnerabilidade, veja [SECURITY.md](SECURITY.md).
 
 Fatos verificados em 2026-10-14. Podem ter mudado depois dessa data. Não dizemos nada sobre qualidade, popularidade ou segurança desses projetos.
 
-- [ContentHub](https://github.com/thallisribeiro/contenthub): tem um gate factual no fluxo e o carrossel dele é para Instagram. Não encontramos pasta `.github` (sem CI) no repositório.
+- [ContentHub](https://github.com/thallisribeiro/contenthub): tem um gate factual no fluxo e o carrossel dele é para Instagram. Não encontramos uma pasta `.github` no repositório (isso não diz nada sobre outros jeitos de ter CI).
 - [threads-carousel-claude-skill](https://github.com/itchernetski/threads-carousel-claude-skill) (licença MIT, no arquivo LICENSE): gera carrossel com prévia em navegador (Next.js) e a exportação é feita no navegador, em formatos de várias redes. Este projeto nasceu de uma auditoria de segurança dele: as regras do validador e a ideia de rodar tudo em container vêm desse trabalho. O código foi reescrito para este repositório (só a expressão regular de número e o formato da linha de achado coincidem).
 - [Slashgear/linkedin-carousel-gen](https://github.com/Slashgear/linkedin-carousel-gen): MIT, usa Satori e Bun para gerar PDFs de carrossel do LinkedIn.
 
