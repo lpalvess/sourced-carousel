@@ -165,38 +165,38 @@ Geradores de carrossel para LinkedIn transformam texto em slides, mas nenhum dos
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| VAL-01 | P1: Validar | Design | In Tasks |
-| VAL-02 | P1: Validar | Design | In Tasks |
-| VAL-03 | P1: Validar | Design | In Tasks |
-| VAL-04 | P1: Validar | Design | In Tasks |
-| VAL-05 | P1: Validar | Design | In Tasks |
-| VAL-06 | P1: Validar | Design | In Tasks |
-| VAL-07 | P1: Validar | Design | In Tasks |
-| VAL-08 | P1: Validar | Design | In Tasks |
-| VAL-09 | P1: Validar | Design | In Tasks |
-| VAL-10 | P1: Validar | Design | In Tasks |
-| VAL-11 | P1: Validar | Design | In Tasks |
-| VAL-12 | P1: Validar | Design | In Tasks |
-| VAL-13 | P1: Validar | Design | In Tasks |
-| VAL-14 | P1: Validar | Design | In Tasks |
-| RND-01 | P1: Gerar | Design | In Tasks |
-| RND-02 | P1: Gerar | Design | In Tasks |
-| RND-03 | P1: Gerar | Design | In Tasks |
-| RND-04 | P1: Gerar | Design | In Tasks |
-| RND-05 | P1: Gerar | Design | In Tasks |
-| RND-06 | P1: Gerar | Design | In Tasks |
-| RND-07 | P1: Gerar | Design | In Tasks |
-| RND-08 | P1: Gerar | Design | In Tasks |
-| RND-09 | P1: Gerar | Design | In Tasks |
-| RND-10 | P1: Gerar | Design | In Tasks |
-| RND-11 | P1: Gerar | Design | In Tasks |
+| VAL-01 | P1: Validar | Design | Implementing |
+| VAL-02 | P1: Validar | Design | Implementing |
+| VAL-03 | P1: Validar | Design | Implementing |
+| VAL-04 | P1: Validar | Design | Implementing |
+| VAL-05 | P1: Validar | Design | Implementing |
+| VAL-06 | P1: Validar | Design | Implementing |
+| VAL-07 | P1: Validar | Design | Implementing |
+| VAL-08 | P1: Validar | Design | Implementing |
+| VAL-09 | P1: Validar | Design | Implementing |
+| VAL-10 | P1: Validar | Design | Implementing |
+| VAL-11 | P1: Validar | Design | Implementing |
+| VAL-12 | P1: Validar | Design | Implementing |
+| VAL-13 | P1: Validar | Design | Implementing |
+| VAL-14 | P1: Validar | Design | Implementing |
+| RND-01 | P1: Gerar | Design | Implementing |
+| RND-02 | P1: Gerar | Design | Implementing |
+| RND-03 | P1: Gerar | Design | Implementing |
+| RND-04 | P1: Gerar | Design | Implementing |
+| RND-05 | P1: Gerar | Design | Implementing |
+| RND-06 | P1: Gerar | Design | Implementing |
+| RND-07 | P1: Gerar | Design | Implementing |
+| RND-08 | P1: Gerar | Design | Implementing |
+| RND-09 | P1: Gerar | Design | Implementing |
+| RND-10 | P1: Gerar | Design | Implementing |
+| RND-11 | P1: Gerar | Design | Implementing |
 | SEC-01 | P2: Repositório seguro | Design | In Tasks |
 | SEC-02 | P2: Repositório seguro | Design | In Tasks |
 | SEC-03 | P2: Repositório seguro | Design | In Tasks |
-| SEC-04 | P2: Repositório seguro | Design | In Tasks |
-| SEC-05 | P2: Repositório seguro | Design | In Tasks |
+| SEC-04 | P2: Repositório seguro | Design | Implementing |
+| SEC-05 | P2: Repositório seguro | Design | Implementing |
 | SEC-06 | P2: Repositório seguro | Design | In Tasks |
-| SEC-07 | P2: Repositório seguro | Design | In Tasks |
+| SEC-07 | P2: Repositório seguro | Design | Implementing |
 | DOC-01 | P2: Skill e documentação | Design | In Tasks |
 | DOC-02 | P2: Skill e documentação | Design | In Tasks |
 | DOC-03 | P2: Skill e documentação | Design | In Tasks |

@@ -9,9 +9,48 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: `.specs/features/v1/design.md`
-**Status**: Draft
+**Status**: In Progress (T1 a T28, T30 e T31 feitas; faltam T29, T32 a T37)
 
 **Regras do projeto (valem para toda tarefa):** código de terceiros só roda em container; commits em Conventional Commits em inglês com a identidade noreply do Lucas; nenhum push, nenhum repositório remoto e nenhuma configuração do GitHub sem OK explícito do Lucas; nenhum travessão nem seta em texto escrito; nenhuma afirmação sobre terceiros que não tenha sido verificada.
+
+---
+
+## Progresso
+
+| Tarefa | Commit na main |
+| ------ | -------------- |
+| T1 | 51d09e2 |
+| T2 | 35f5898 |
+| T3 | 6466e00 |
+| T4 | c99d9b5 |
+| T5 | 761fa65 |
+| T6 | 50a6eb2 |
+| T7 | 44dc867 |
+| T8 | e4541d2 |
+| T9 | eb4dbb5 |
+| T10 | 3677812 |
+| T11 | 1d36808 |
+| T12 | b6fcd8d |
+| T13 | 99e6390 |
+| T14 | 068708d |
+| T15 | fbb9846 |
+| T16 | 4acacfb |
+| T17 | 3838d81 |
+| T18 | 15b9ba1 |
+| T19 | 7b27235 |
+| T20 | 935bf8c |
+| T21 | 41b6be5 |
+| T22 | 1d8fe8e |
+| T23 | c22cc11 |
+| T24 | 61e8358 |
+| T25 | 2ca2d65 |
+| T26 | ced13eb |
+| T27 | 1dc36ad |
+| T28 | 08c05d5 |
+| T30 | 06b5685 |
+| T31 | 06f570f |
+
+Gate da main (container, sem rede): typecheck ok e 309 testes passando. T24 achou na inspeção visual o bug de box-sizing dos layouts e T26 achou o de limpeza no tratamento de erro; os dois foram corrigidos com teste.
 
 ---
 
@@ -128,9 +167,9 @@ T36 → T37
 
 **Done when**:
 
-- [ ] Só 2 dependências diretas de runtime, ambas com versão exata (sem ^)
-- [ ] `bun install --frozen-lockfile --ignore-scripts` passa no container
-- [ ] Scripts `test` e `typecheck` definidos
+- [x] Só 2 dependências diretas de runtime, ambas com versão exata (sem ^)
+- [x] `bun install --frozen-lockfile --ignore-scripts` passa no container
+- [x] Scripts `test` e `typecheck` definidos
 
 **Tests**: none
 **Gate**: build
@@ -154,8 +193,8 @@ T36 → T37
 
 **Done when**:
 
-- [ ] `bunx tsc --noEmit` roda sem erro num src vazio
-- [ ] Modo estrito ligado
+- [x] `bunx tsc --noEmit` roda sem erro num src vazio
+- [x] Modo estrito ligado
 
 **Tests**: none
 **Gate**: build
@@ -179,7 +218,7 @@ T36 → T37
 
 **Done when**:
 
-- [ ] node_modules, out, .env e arquivos de editor ignorados
+- [x] node_modules, out, .env e arquivos de editor ignorados
 
 **Tests**: none
 **Gate**: build
@@ -203,7 +242,7 @@ T36 → T37
 
 **Done when**:
 
-- [ ] Texto MIT completo com o ano de 2026
+- [x] Texto MIT completo com o ano de 2026
 
 **Tests**: none
 **Gate**: build
@@ -227,8 +266,8 @@ T36 → T37
 
 **Done when**:
 
-- [ ] Seis tipos de slide e os campos de cada um, com `source` e `highlight` opcionais
-- [ ] `bunx tsc --noEmit` passa
+- [x] Seis tipos de slide e os campos de cada um, com `source` e `highlight` opcionais
+- [x] `bunx tsc --noEmit` passa
 
 **Tests**: none
 **Gate**: build
@@ -252,10 +291,10 @@ T36 → T37
 
 **Done when**:
 
-- [ ] JSON inválido, raiz que não é objeto e `slides` que não é lista geram `schema-invalid` com o caminho
-- [ ] Chaves `__proto__` e `constructor` na entrada não alteram nenhum objeto global
-- [ ] Gate check passes: `bun test`
-- [ ] Test count: testes de VAL-02 passam
+- [x] JSON inválido, raiz que não é objeto e `slides` que não é lista geram `schema-invalid` com o caminho
+- [x] Chaves `__proto__` e `constructor` na entrada não alteram nenhum objeto global
+- [x] Gate check passes: `bun test`
+- [x] Test count: testes de VAL-02 passam
 
 **Tests**: unit
 **Gate**: quick
@@ -279,10 +318,10 @@ T36 → T37
 
 **Done when**:
 
-- [ ] Cada um dos 6 tipos tem um teste de campo obrigatório ausente
-- [ ] 2 e 11 slides reprovam, 3 e 10 passam
-- [ ] `structure` é aviso e não altera o código de saída
-- [ ] Gate check passes: `bun test`
+- [x] Cada um dos 6 tipos tem um teste de campo obrigatório ausente
+- [x] 2 e 11 slides reprovam, 3 e 10 passam
+- [x] `structure` é aviso e não altera o código de saída
+- [x] Gate check passes: `bun test`
 
 **Tests**: unit
 **Gate**: quick
@@ -306,10 +345,10 @@ T36 → T37
 
 **Done when**:
 
-- [ ] 40 e 41 palavras, 3 e 4 linhas, 2 e 3 palavras de highlight, 80 e 81 caracteres de source cobertos
-- [ ] Highlight fora do texto reprova
-- [ ] `source` conta caracteres e não unidades UTF-16 (emoji)
-- [ ] Gate check passes: `bun test`
+- [x] 40 e 41 palavras, 3 e 4 linhas, 2 e 3 palavras de highlight, 80 e 81 caracteres de source cobertos
+- [x] Highlight fora do texto reprova
+- [x] `source` conta caracteres e não unidades UTF-16 (emoji)
+- [x] Gate check passes: `bun test`
 
 **Tests**: unit
 **Gate**: quick
@@ -333,9 +372,9 @@ T36 → T37
 
 **Done when**:
 
-- [ ] Cada caractere detectado em text, itens de lista, citação e source, com o caractere no relatório
-- [ ] Hífen simples não reprova
-- [ ] Gate check passes: `bun test`
+- [x] Cada caractere detectado em text, itens de lista, citação e source, com o caractere no relatório
+- [x] Hífen simples não reprova
+- [x] Gate check passes: `bun test`
 
 **Tests**: unit
 **Gate**: quick
@@ -359,11 +398,11 @@ T36 → T37
 
 **Done when**:
 
-- [ ] Número presente passa, ausente reprova com o número
-- [ ] Fatos vazios reprovam todo número, o mesmo número em dois slides gera dois achados
-- [ ] `2.500` e `2,5` comparados como escritos, `source` fora da checagem
-- [ ] Sem facts, aviso uma única vez e sem falha
-- [ ] Gate check passes: `bun test`
+- [x] Número presente passa, ausente reprova com o número
+- [x] Fatos vazios reprovam todo número, o mesmo número em dois slides gera dois achados
+- [x] `2.500` e `2,5` comparados como escritos, `source` fora da checagem
+- [x] Sem facts, aviso uma única vez e sem falha
+- [x] Gate check passes: `bun test`
 
 **Tests**: unit
 **Gate**: quick
@@ -387,9 +426,9 @@ T36 → T37
 
 **Done when**:
 
-- [ ] Sem erro sai com 0, com erro sai com 1, arquivo ilegível sai com 2 com o caminho
-- [ ] Formato da linha igual ao da spec
-- [ ] Gate check passes: `bun test`
+- [x] Sem erro sai com 0, com erro sai com 1, arquivo ilegível sai com 2 com o caminho
+- [x] Formato da linha igual ao da spec
+- [x] Gate check passes: `bun test`
 
 **Tests**: unit
 **Gate**: quick
@@ -413,8 +452,8 @@ T36 → T37
 
 **Done when**:
 
-- [ ] O teste passa no src atual e falha numa cópia temporária com cada padrão proibido (prova de que detecta)
-- [ ] Gate check passes: `bun test`
+- [x] O teste passa no src atual e falha numa cópia temporária com cada padrão proibido (prova de que detecta)
+- [x] Gate check passes: `bun test`
 
 **Tests**: unit
 **Gate**: quick
@@ -438,9 +477,9 @@ T36 → T37
 
 **Done when**:
 
-- [ ] LICENSE do pacote confirmada como OFL-1.1; se não for, a tarefa PARA
-- [ ] Só os 3 arquivos WOFF2 necessários entram no repositório
-- [ ] Gate check passes: `bunx tsc --noEmit && bun test`
+- [x] LICENSE do pacote confirmada como OFL-1.1; se não for, a tarefa PARA
+- [x] Só os 3 arquivos WOFF2 necessários entram no repositório
+- [x] Gate check passes: `bunx tsc --noEmit && bun test`
 
 **Tests**: none
 **Gate**: build
@@ -464,7 +503,7 @@ T36 → T37
 
 **Done when**:
 
-- [ ] Texto completo da licença OFL da Inter
+- [x] Texto completo da licença OFL da Inter
 
 **Tests**: none
 **Gate**: build
@@ -488,10 +527,10 @@ T36 → T37
 
 **Done when**:
 
-- [ ] dark e light com fundo e texto contrastantes, destaque configurável
-- [ ] linkedin-square 1080x1080 e linkedin-portrait 1080x1350
-- [ ] Gate check passes: `bun test`
-- [ ] Test count: testes de tema passam
+- [x] dark e light com fundo e texto contrastantes, destaque configurável
+- [x] linkedin-square 1080x1080 e linkedin-portrait 1080x1350
+- [x] Gate check passes: `bun test`
+- [x] Test count: testes de tema passam
 
 **Tests**: unit
 **Gate**: quick
@@ -515,9 +554,9 @@ T36 → T37
 
 **Done when**:
 
-- [ ] Com source, o texto aparece como string exata no objeto
-- [ ] Sem source ou vazio, nada é gerado
-- [ ] Gate check passes: `bun test`
+- [x] Com source, o texto aparece como string exata no objeto
+- [x] Sem source ou vazio, nada é gerado
+- [x] Gate check passes: `bun test`
 
 **Tests**: unit
 **Gate**: quick
@@ -541,9 +580,9 @@ T36 → T37
 
 **Done when**:
 
-- [ ] O texto da entrada aparece só como valor string de nó de texto, nunca como elemento
-- [ ] Highlight na cor do tema
-- [ ] Gate check passes: `bun test`
+- [x] O texto da entrada aparece só como valor string de nó de texto, nunca como elemento
+- [x] Highlight na cor do tema
+- [x] Gate check passes: `bun test`
 
 **Tests**: unit
 **Gate**: quick
@@ -567,8 +606,8 @@ T36 → T37
 
 **Done when**:
 
-- [ ] Texto só como string, highlight na cor do tema, footer incluído
-- [ ] Gate check passes: `bun test`
+- [x] Texto só como string, highlight na cor do tema, footer incluído
+- [x] Gate check passes: `bun test`
 
 **Tests**: unit
 **Gate**: quick
@@ -592,8 +631,8 @@ T36 → T37
 
 **Done when**:
 
-- [ ] Número e rótulo só como string, footer incluído
-- [ ] Gate check passes: `bun test`
+- [x] Número e rótulo só como string, footer incluído
+- [x] Gate check passes: `bun test`
 
 **Tests**: unit
 **Gate**: quick
@@ -617,8 +656,8 @@ T36 → T37
 
 **Done when**:
 
-- [ ] Itens só como string, footer incluído, lista de 1 a 6 itens
-- [ ] Gate check passes: `bun test`
+- [x] Itens só como string, footer incluído, lista de 1 a 6 itens
+- [x] Gate check passes: `bun test`
 
 **Tests**: unit
 **Gate**: quick
@@ -642,8 +681,8 @@ T36 → T37
 
 **Done when**:
 
-- [ ] Citação e autor só como string, footer incluído
-- [ ] Gate check passes: `bun test`
+- [x] Citação e autor só como string, footer incluído
+- [x] Gate check passes: `bun test`
 
 **Tests**: unit
 **Gate**: quick
@@ -667,8 +706,8 @@ T36 → T37
 
 **Done when**:
 
-- [ ] Texto e handle só como string, footer incluído
-- [ ] Gate check passes: `bun test`
+- [x] Texto e handle só como string, footer incluído
+- [x] Gate check passes: `bun test`
 
 **Tests**: unit
 **Gate**: quick
@@ -692,9 +731,9 @@ T36 → T37
 
 **Done when**:
 
-- [ ] Texto curto usa o maior tamanho, texto no limite de 40 palavras cabe no tamanho mínimo
-- [ ] Texto acima do limite do mínimo falha com `text-overflow` indicando o slide
-- [ ] Gate check passes: `bun test`
+- [x] Texto curto usa o maior tamanho, texto no limite de 40 palavras cabe no tamanho mínimo
+- [x] Texto acima do limite do mínimo falha com `text-overflow` indicando o slide
+- [x] Gate check passes: `bun test`
 
 **Tests**: unit
 **Gate**: quick
@@ -718,11 +757,11 @@ T36 → T37
 
 **Done when**:
 
-- [ ] Cada PNG tem a largura e a altura exatas do formato
-- [ ] Dois renders do mesmo slide dão PNGs idênticos byte a byte
-- [ ] Um slide com `<script>`, `<img onerror>` e `javascript:` no texto gera SVG sem elemento script nem img
-- [ ] Primeira verificação: a Inter estática 700 e 800 saem com pesos distintos
-- [ ] Gate check passes: `bunx tsc --noEmit && bun test`
+- [x] Cada PNG tem a largura e a altura exatas do formato
+- [x] Dois renders do mesmo slide dão PNGs idênticos byte a byte
+- [x] Um slide com `<script>`, `<img onerror>` e `javascript:` no texto gera SVG sem elemento script nem img
+- [x] Primeira verificação: a Inter estática 700 e 800 saem com pesos distintos
+- [x] Gate check passes: `bunx tsc --noEmit && bun test`
 
 **Tests**: integration
 **Gate**: full
@@ -746,10 +785,10 @@ T36 → T37
 
 **Done when**:
 
-- [ ] PDF com N páginas e tamanho de página igual ao do formato
-- [ ] Tabela de referências cruzadas com os deslocamentos corretos (teste que confere cada offset)
-- [ ] Dois PDFs do mesmo conteúdo são idênticos byte a byte
-- [ ] Gate check passes: `bunx tsc --noEmit && bun test`
+- [x] PDF com N páginas e tamanho de página igual ao do formato
+- [x] Tabela de referências cruzadas com os deslocamentos corretos (teste que confere cada offset)
+- [x] Dois PDFs do mesmo conteúdo são idênticos byte a byte
+- [x] Gate check passes: `bunx tsc --noEmit && bun test`
 
 **Tests**: integration
 **Gate**: full
@@ -773,11 +812,11 @@ T36 → T37
 
 **Done when**:
 
-- [ ] Erro de validação aborta com o código do validador e não escreve nada
-- [ ] Falha em qualquer etapa nomeia a etapa e não deixa carousel.pdf
-- [ ] Imprime `slide <i>/<n>` por slide
-- [ ] Sobrescreve arquivos de mesmo nome sem apagar outros
-- [ ] Gate check passes: `bunx tsc --noEmit && bun test`
+- [x] Erro de validação aborta com o código do validador e não escreve nada
+- [x] Falha em qualquer etapa nomeia a etapa e não deixa carousel.pdf
+- [x] Imprime `slide <i>/<n>` por slide
+- [x] Sobrescreve arquivos de mesmo nome sem apagar outros
+- [x] Gate check passes: `bunx tsc --noEmit && bun test`
 
 **Tests**: integration
 **Gate**: full
@@ -801,10 +840,10 @@ T36 → T37
 
 **Done when**:
 
-- [ ] 6 PNGs de 1080x1080 e um PDF de 6 páginas
-- [ ] Tema light com fundo claro e dark com fundo escuro
-- [ ] Dois renders produzem PNGs idênticos
-- [ ] Gate check passes: `bunx tsc --noEmit && bun test`
+- [x] 6 PNGs de 1080x1080 e um PDF de 6 páginas
+- [x] Tema light com fundo claro e dark com fundo escuro
+- [x] Dois renders produzem PNGs idênticos
+- [x] Gate check passes: `bunx tsc --noEmit && bun test`
 
 **Tests**: integration
 **Gate**: full
@@ -828,9 +867,9 @@ T36 → T37
 
 **Done when**:
 
-- [ ] Roda o exemplo sem rede e sai com 0
-- [ ] Prova de isolamento: dentro do mesmo container um fetch falha e a escrita no código falha
-- [ ] Gate check passes: `bunx tsc --noEmit && bun test`
+- [x] Roda o exemplo sem rede e sai com 0
+- [x] Prova de isolamento: dentro do mesmo container um fetch falha e a escrita no código falha
+- [x] Gate check passes: `bunx tsc --noEmit && bun test`
 
 **Tests**: none
 **Gate**: build
@@ -882,8 +921,8 @@ T36 → T37
 
 **Done when**:
 
-- [ ] Blocos bun e github-actions, weekly, grupo minor-and-patch, prefixo chore(deps) e chore(ci)
-- [ ] YAML válido
+- [x] Blocos bun e github-actions, weekly, grupo minor-and-patch, prefixo chore(deps) e chore(ci)
+- [x] YAML válido
 
 **Tests**: none
 **Gate**: build
@@ -907,8 +946,8 @@ T36 → T37
 
 **Done when**:
 
-- [ ] Canal de reporte que não expõe o e-mail corporativo do autor
-- [ ] Escopo e o que não é suportado
+- [x] Canal de reporte que não expõe o e-mail corporativo do autor
+- [x] Escopo e o que não é suportado
 
 **Tests**: none
 **Gate**: build
