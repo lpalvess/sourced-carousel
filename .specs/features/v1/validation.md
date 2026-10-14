@@ -1,305 +1,333 @@
-**Verdict: FAIL**
-
 ## Validation: sourced-carousel v1 - FAIL
 
-# sourced-carousel v1 Validation
+**Verdict: FAIL**
+
+# sourced-carousel v1 Validation (rodada 2)
 
 **Data**: 2026-10-14
-**Spec**: `.specs/features/v1/spec.md`
-**Intervalo de commits**: `git log --oneline a116298..HEAD` lista 41 commits (51d09e2 ... e1b561c). HEAD = `e1b561cc328dd6b4ba3c326e0fadc02ee2376ad9` (e1b561c), branch main, arvore limpa antes e depois do trabalho.
-**Verifier**: subagente independente (autor diferente do verificador). Nenhum arquivo do repositorio foi alterado, exceto este relatorio. Tudo que executa codigo do projeto rodou em container `oven/bun:1` com `--network none`, sem montar a home.
+**Spec**: `.specs/features/v1/spec.md` (38 requisitos)
+**Intervalo de commits**: `git log --oneline a116298..HEAD` lista 46 commits (51d09e2 ... 9c13b67). HEAD = `9c13b6737b269a575447d258372c438b3cc81d95` (9c13b67), branch main, arvore limpa antes e depois (`git status --short` vazio).
+**Verifier**: subagente independente, rodada 2 (nao escreveu o codigo nem participou da rodada 1). Nenhum arquivo do repositorio foi alterado, exceto este relatorio. Tudo que executa codigo do projeto rodou em container `oven/bun:1` com `--network none`, sem montar a home, sobre copias em `/tmp/.../scratchpad`. A unica excecao foi `scripts/carousel.sh` (selftest, validate, render), que monta o repositorio somente leitura e grava so em pastas do scratchpad. As chamadas `gh api` e `npm view` foram somente leitura.
 
 ## Por que FAIL
 
-1. O validador compara numeros por substring pura (`src/validate.ts:240`), o que deixa passar "42%" quando os fatos dizem "142%" (FURO F1, comprovado por execucao). O teste `tests/validate.test.ts:444` fixa esse comportamento de proposito.
-2. Digitos Unicode de largura total (por exemplo U+FF14 U+FF12) nao sao reconhecidos como numero (FURO F2, `src/validate.ts:165`).
-3. O sensor deixou 8 de 45 mutantes sobreviverem, 5 deles em comportamento exigido pela spec (secao Sensor).
-4. DOC-05: o README afirma sobre terceiros coisas fora da lista verificada (secao Documentacao).
-5. RND-04: nenhuma asserção prova o rodape no PDF.
+1. FURO comprovado por execucao: o validador aceita um numero com unidade que e prefixo de outra unidade nos fatos. `10 mi` (milhoes) passa contra fatos com `10 mil`; `4 mil` passa contra `4 milhões`; `5 k` passa contra `5 kg`. Erro de 1000 vezes sem reprovar. Causa: `src/validate.ts:259` (`factsContain`) nao exige fim de palavra depois de uma unidade que faz parte do token.
+2. FURO: o sinal do lado dos fatos nao e comparado. `5%` nos slides passa contra fatos com `-5%` (sinal trocado).
+3. FURO: unidades fora da lista fechada, espaco como separador de milhar (`1 000 000` passa contra fatos com `1 000`), notacao `1e3` e digitos colados a letras (`Q4`, `H2`, `ISO27001`, `10h45`) nao sao conferidos, e nenhum README nem o SKILL.md avisa disso.
+4. Falso positivo: versao `v3.0` ou `v2.1.3` que ESTA nos fatos e reprovada (`number-not-in-facts: "0"`, `"1.3"`).
+5. Sensor: 21 de 78 mutantes sobreviveram, 19 deles alem dos dois esperados; varios em comportamento exigido pela spec (VAL-08 bloco U+2900 a U+297F, sinal `+`, U+2212, VAL-15 em outros alfabetos, fatores de ajuste de texto).
+6. DOC-05: os dois READMEs afirmam sobre o threads-carousel-claude-skill coisas fora da lista verificada.
 
-A spec exige "sem afirmar o que nao foi verificado" e a promessa central do projeto e "nenhum numero sem fonte". Defeitos reais, entao FAIL, sem adaptar o veredito ao `validate_state.py`.
-
-## Task Completion
-
-| Tarefa | Status | Notas |
-| ------ | ------ | ----- |
-| T1 a T28, T30, T31 | Feitas | Commits listados em `.specs/features/v1/tasks.md` (tabela Progresso). |
-| T29, T32 a T37 | Codigo presente, registro ausente | O cabecalho de `tasks.md` ainda diz "faltam T29, T32 a T37" e a tabela Progresso nao tem esses commits, embora `git log` mostre d43e519 (ci), 84de72c (docs deps), 0b91758, da13912, 0e442f7, 516633a, 58f0a7d. `spec.md` (Requirement Traceability) segue com "Implementing" e "In Tasks" em todos os 37 requisitos. Documentacao do projeto desatualizada, nao e defeito de produto. |
+Tudo isso e defeito real, entao FAIL, sem adaptar o veredito ao `validate_state.py`.
 
 ## Gate
 
-- Comando: `bunx tsc --noEmit && bun test` no container sem rede.
-- `bunx tsc --noEmit`: saida 0, sem erros.
-- `bun test`: **309 passed, 0 failed**, 4058 expect(), 18 arquivos, 12,11 s. Sem testes pulados.
-- Contagem de antes da feature: nao ha baseline anterior (o repositorio nasce com a feature). tasks.md registra 309, igual ao observado.
-- `scripts/carousel.sh selftest`: 5 de 5 checks "ok", saida 0.
-- actionlint (imagem local `rhysd/actionlint:latest`, `--network none`) sobre `.github/workflows/ci.yml`: saida 0, sem achados.
+- `bunx tsc --noEmit` no container sem rede: saida 0, sem erros.
+- `bun test` no container sem rede: **366 passed, 0 failed**, 4148 expect(), 19 arquivos, 13,73 s. Sem testes pulados. (Rodada 1: 309. Contagem subiu, nenhum teste removido.)
+- `scripts/carousel.sh selftest`: 5 de 5 `ok`, saida 0.
+- actionlint (`rhysd/actionlint:latest`, `--network none`) sobre `.github/workflows/ci.yml`: saida 0, sem achados.
 
-## Spec-Anchored Acceptance Criteria
+## Spec-Anchored Acceptance Criteria (38 requisitos)
 
-Convencao de linhas: sempre do arquivo real (`grep -n`). Legenda: PASS = asserção bate com o resultado definido pela spec. PASS+LP = passa, com lacuna de precisao da spec. GAP = sem evidencia ou evidencia parcial.
+Legenda: PASS, PASS+LP (passa, com lacuna de precisao da spec), GAP (evidencia parcial ou fraca). Linhas conferidas com `grep -n` e `sed -n`.
 
-### P1: Validar o carrossel antes de gerar
+| ID | Spec define | Evidencia (`arquivo:linha` + asserção) | Resultado |
+| -- | ----------- | -------------------------------------- | --------- |
+| VAL-01 | linha `<severity> slide <N> <rule-id>: <message>`, sai 0 so sem erros | `tests/cli.test.ts:56` `toEqual({ code: 0, lines: [] })`; `:63` `toMatch(/^error slide 2 forbidden-char: .+/)` e `:61` `code` 1; `:68` e `:70` aviso nao muda o codigo | PASS |
+| VAL-02 | `schema-invalid` com caminho do campo, sai 1 | `tests/schema.test.ts:26` `toMatchObject({ severity: "error", slide: 0, rule: "schema-invalid" })` e `:27` `toContain("$")`; `:45` `toContain("slides")`; `tests/cli.test.ts:101-102` code 1 | PASS |
+| VAL-03 | arquivo ilegivel: sai 2 e imprime o caminho | `tests/cli.test.ts:110-111` `toBe(2)` e `toContain(p)`; `:117-118` para facts; `:122` diretorio | PASS |
+| VAL-04 | `field-missing` com o nome do campo | `tests/validate.test.ts:48-53` (11 casos) `toContain(\`"${field}"\`)` | PASS |
+| VAL-05 | text com mais de 40 palavras: `too-many-words` | `tests/validate.test.ts:232` 40 passam, `:236-238` 41 falham no slide 2 | PASS |
+| VAL-06 | hook com mais de 3 linhas: `hook-too-long` | `tests/validate.test.ts:258` 3 passam, `:262-264` 4 falham no slide 1, `:268`, `:272-273` CRLF | PASS |
+| VAL-07 | highlight com mais de 2 palavras ou fora dos campos desenhados; autor e handle invalidos | `tests/validate-hardening.test.ts:154` `toEqual(["highlight-invalid"])` (autor); `:158` (handle); `:162-164` aceitos no texto, label e item; `tests/validate.test.ts:288-290` 3 palavras. Mutantes M08, M09, M10 mortos | PASS |
+| VAL-08 | lista de tracos e blocos de setas, as sequencias hifen+maior-que, `=>`, `<-`; hifen e U+2212 permitidos | `tests/validate-hardening.test.ts:132` `toContain("forbidden-char")` (10 amostras: U+2012, U+2015, U+FE58, U+FF0D, U+2794, U+27F6, U+2B62, U+2190, `=>`, `<-`); `:139` `toEqual([])` para hifen e U+2212; `tests/validate.test.ts:353-358` U+2013, U+2014, U+2192, U+21D2 e hifen+maior-que. Nao ha amostra dos blocos U+2900 a U+297F, U+27F0 so por U+27F6 | PASS+LP, mutante M14 sobreviveu (bloco sem teste) |
+| VAL-09 | menos de 3 ou mais de 10: `slide-count` | `tests/validate.test.ts:139-142` (2), `:145` (3), `:149` (10), `:153` (11), `:157-158` (0, 1) | PASS |
+| VAL-10 | aviso `structure`, codigo inalterado | `tests/validate.test.ts:164-176`; `tests/cli.test.ts:68-71` `code 0` com dois `warning ... structure` | PASS |
+| VAL-11 | source com mais de 80 caracteres | `tests/validate.test.ts:320` 80 passam, `:324-326` 81 falham, `:330` 80 emoji passam, `:336` 81 falham | PASS |
+| VAL-12 | numero inteiro (sem substring), sinal, unidade, NFKC, comparado como escrito | `tests/validate-hardening.test.ts:23` `142%`; `:27-28` `130.000`; `:33-34` `1.5`; `:39-40`; `:45-46`; `:50-51` `-3%` vs `3%`; `:55`; `:59-62` `5K`; `:67-68`; `:72-74` largura total; `:78-83` NBSP. Falhas de execucao em 4.b | GAP: passa nos casos listados, mas ver FURO 1, 2 e 3 (prefixo de unidade nos fatos, sinal nos fatos, unidades fora da lista). Mutantes M17, M19, M25, M26 sobreviveram |
+| VAL-13 | sem `--facts`: aviso `facts-skipped` uma vez, sem falhar | `tests/validate.test.ts:478-481` `toHaveLength(1)`, `toMatchObject({ severity: "warning", slide: 2 })`; `tests/cli.test.ts:76-78` | PASS |
+| VAL-14 | ler a entrada sem executar codigo | `tests/schema.test.ts:66-70` `polluted` undefined; `:75-76`; `:85-86`; `tests/security-static.test.ts:83-86` `scan(src)` `toEqual([])` (heuristica de 25 padroes). Reexecutado em 4.d com `__proto__` e `constructor` | PASS (a guarda estatica e heuristica, dito no README) |
+| VAL-15 | digito decimal fora de 0 a 9 apos NFKC: `non-ascii-digit` | `tests/validate-hardening.test.ts:110` `toContain("non-ascii-digit")` (U+0664 U+0662); `:114` `not.toContain` para ASCII e largura total. So um alfabeto testado: mutante M18 sobreviveu | PASS+LP (cobre so arabe-indicos; spec diz "um texto", mas o codigo checa so os campos de numero, `source` e `highlight` ficam fora) |
+| RND-01 | valida primeiro e aborta com o codigo do validador | `tests/cli-render.test.ts:36` `code` 1, `:37` `error slide 3 forbidden-char`, `:38` `readdir(out)` rejeita; `:49-51` fatos | PASS |
+| RND-02 | `NN-<type>.png` de 01, tamanho exato | `tests/cli-render.test.ts:63-71` `toEqual([ "01-hook.png", ... "carousel.pdf" ])`; `tests/render.test.ts:65` `pngSize ... toEqual({ width: 1080, height: 1080 })`, `:73` 1080x1350; `tests/e2e.test.ts:46-48` | PASS |
+| RND-03 | `out/carousel.pdf` com uma pagina por slide | `tests/cli-render.test.ts:74` `/\/Type \/Page(?![s])/g` `toBe(6)`; `tests/e2e.test.ts:49-50` | PASS |
+| RND-04 | desenhar o rodape no PNG e no PDF | `tests/render.test.ts:157-158` PNG com source `equals(...)` `toBe(false)`; `tests/cli-render.test.ts:170-171` `pdfA.equals(pdfB)).toBe(false)`; `tests/layout-footer.test.ts:16-19` texto exato no no. Mutante X2 (rodape nunca desenhado) morto | PASS+LP (a prova de pixel e "a imagem muda", nao "o texto aparece"; spec nao define a forma de prova) |
+| RND-05 | trecho na cor de destaque | `tests/layout-hook.test.ts:30-38` e `tests/layout-helpers.test.ts:119-133` span com `ctx.tokens.accent`. Mutante X3 morto | PASS+LP (prova no no do layout, nao em pixel) |
+| RND-06 | texto de entrada nunca vira elemento | `tests/render.test.ts:131-150` `not.toContain("<script")`, `<img`, `<foreignObject`, `onerror`; `tests/layout-footer.test.ts:26` | PASS |
+| RND-07 | conclui em container `--network none`, so fontes do repo | `scripts/selftest.ts:21-40` (5 checks); execucao: `scripts/carousel.sh selftest` 5/5 `ok`; `scripts/carousel.sh:35-37` flags; render do exemplo no container: saida 0 | PASS (por execucao; nao ha teste bun para isso) |
+| RND-08 | falha: codigo diferente de zero, nomeia a etapa, sem PDF | `tests/cli-render.test.ts:96-100` PDF antigo removido, `:109-113` `code 3`, `error: render failed:`, `slide 2`, `:123-125` `error: write failed:`, `:180-183` `toBe("error: pdf failed: boom")`, `:195-196`. Mutantes C03, C04 mortos; C05 sobreviveu (limpeza apos falha de escrita, praticamente equivalente) | PASS |
+| RND-09 | PNGs identicos byte a byte e PDFs de mesmo numero e tamanho de paginas | `tests/e2e.test.ts:67-69` `equals(...)` `toBe(true)` para todo arquivo, PDF incluido; `tests/render.test.ts:88` | PASS |
+| RND-10 | `slide <i>/<n>` por slide | `tests/cli-render.test.ts:86` `toEqual(["slide 1/6", ... "slide 6/6"])`; `tests/render.test.ts:201` | PASS |
+| RND-11 | light: fundo claro e texto escuro; dark o inverso | `tests/render.test.ts:99` `bandIsBackground(...)` `toBe(true)` para cada tema; `tests/theme.test.ts:27-37` tokens; `tests/e2e.test.ts:82` | PASS+LP (cor do texto so no token, nao em pixel) |
+| SEC-01 | ordem: instalacao congelada sem scripts, typecheck, testes, exemplo sem rede, trivy | `.github/workflows/ci.yml:30` `bun install --frozen-lockfile --ignore-scripts`, `:33` tsc, `:36` bun test, `:39` render do exemplo, `:52` selftest, `:55-61` trivy | PASS por leitura e actionlint (o CI NUNCA rodou no GitHub) |
+| SEC-02 | trivy HIGH ou CRITICAL falha | `ci.yml:60-61` `severity: HIGH,CRITICAL`, `exit-code: "1"` | PASS por leitura (nunca rodou no GitHub) |
+| SEC-03 | actions por SHA completo com a tag em comentario, `permissions: contents: read` | `ci.yml:8-9`, `:20` `3d3c42e5...` `# v7.0.1`, `:25` `0c5077e5...` `# v2.2.0`, `:55` `ed142fd0...` `# v0.36.0`. `gh api repos/<dono>/<repo>/git/ref/tags/<tag>`: checkout v7.0.1 e setup-bun v2.2.0 sao `commit` e batem; trivy-action v0.36.0 e tag anotada `a9c7b0f0...`, desreferenciada para o commit `ed142fd0673e97e23eac54620cfb913e5ce36c25`, bate | PASS por leitura e `gh api` (nunca rodou no GitHub) |
+| SEC-04 | dependabot `bun` e `github-actions`, semanal, minor e patch agrupados | `.github/dependabot.yml:3`, `:6`, `:16-18`; `:20`, `:23`, `:33-35` | PASS |
+| SEC-05 | SECURITY.md, LICENSE MIT, THIRD_PARTY_FONTS.md com texto da licenca | arquivos existem; `SECURITY.md` explica como reportar; `LICENSE` linha 1 `MIT License`; `THIRD_PARTY_FONTS.md` traz o texto OFL 1.1 | PASS |
+| SEC-06 | no maximo 4 diretas, `docs/dependencies.md` lista todas com versao, licenca e scripts, audita as diretas | `docs/dependencies.md` secao 1 (2 diretas), 3 (25 transitivas), 4 (trivy). Amostra de 7 com `npm view <pkg>@<versao> license scripts --json`: satori 0.57.2 MPL-2.0 `prepare`; resvg-wasm 2.6.2 MPL-2.0; harfbuzzjs 0.10.0 MIT `prepare`; pako 0.2.9 MIT sem scripts; css-color-keywords 1.0.0 ISC; typescript 5.9.3 Apache-2.0; fflate 0.7.3 MIT. Todas batem com a tabela | PASS |
+| SEC-07 | sem telemetria nem rede em execucao | `scripts/selftest.ts:21-29` fetch bloqueado; `tests/security-static.test.ts:20-45` (25 padroes, ampliados) | PASS |
+| DOC-01 | SKILL.md descreve o fluxo | `SKILL.md` secoes 1 a 6 (fatos literais, plano com aprovacao, slides.json, validar, gerar, entregar com lista de fatos) | PASS |
+| DOC-02 | nunca publicar, nunca inventar numero | `SKILL.md:12` regra 1 e `:13` regra 2 | PASS |
+| DOC-03 | validar e gerar so pelo script de container | `SKILL.md:16` regra 3, comandos nas linhas 44 e 52 | PASS |
+| DOC-04 | README pt e en com instalacao, exemplo, regras e seguranca | `README.md` e `README.en.md` (secoes Installation `:13`, Full example `:24`, Validator rules `:68`, Security `:98`); regras novas (`non-ascii-digit`, sinal e unidade, mais tracos e setas) descritas nos dois | PASS |
+| DOC-05 | comparar com ContentHub e o gerador auditado sem afirmar o que nao foi verificado | `README.md` secao Comparacao. ContentHub, threads-carousel e Slashgear batem com a lista verificada (ver abaixo), mas o item do threads-carousel acrescenta afirmacoes fora da lista | GAP: afirmacao alem da lista |
 
-| ID | Resultado definido pela spec | `file:line` + asserção | Resultado |
-| -- | ---------------------------- | ---------------------- | --------- |
-| VAL-01 | Linha `<severity> slide <N> <rule-id>: <message>`; saida 0 so com zero erros | `tests/cli.test.ts:61` `expect(r.code).toBe(1)`; `:63` `toMatch(/^error slide 2 forbidden-char: .+/)`; `:68-71` avisos sozinhos `code 0` e `/^warning slide 1 structure: .+/`; `:56` limpo `{ code: 0, lines: [] }` | PASS |
-| VAL-02 | `schema-invalid` com caminho do campo e saida 1 | `tests/schema.test.ts:25` `toMatchObject({ severity: "error", slide: 0, rule: "schema-invalid" })`, `:26` `toContain("$")`, `:44` `toContain("slides")`; `tests/cli.test.ts:101` `code toBe(1)` e `:102` `/^error slide 0 schema-invalid: /` | PASS+LP (a spec nao define o formato do caminho; os testes so afirmam `toContain`) |
-| VAL-03 | Saida 2 e imprime o caminho | `tests/cli.test.ts:110-111` `code toBe(2)` e `lines.join("\n")).toContain(p)`; `:117-118` idem para o arquivo de fatos; `:122` diretorio `toBe(2)` | PASS |
-| VAL-04 | `field-missing` com o nome do campo | `tests/validate.test.ts:48-53` (11 casos) `toHaveLength(1)`, `toMatchObject({ severity: "error", slide: 2 })`, `message toContain(\`"${field}"\`)` | PASS |
-| VAL-05 | `too-many-words` acima de 40 palavras em slide text | `tests/validate.test.ts:232` 40 passam `toHaveLength(0)`; `:236-238` 41 falham `toHaveLength(1)`, `{severity:"error", slide:2}` | PASS |
-| VAL-06 | `hook-too-long` acima de 3 linhas | `tests/validate.test.ts:258` 3 linhas `toHaveLength(0)`; `:262-264` 4 linhas `toHaveLength(1)`, `{severity:"error", slide:1}` | PASS+LP (a spec nao diz se "linha" e quebra `\n` ou linha renderizada; o codigo conta so `\n`, `src/validate.ts:108`, e o hook do exemplo com 2 linhas sai com 4 linhas no PNG) |
-| VAL-07 | `highlight-invalid` com mais de 2 palavras ou ausente do texto | `tests/validate.test.ts:283-284` 1 e 2 palavras `toHaveLength(0)`; `:288-291` 3 palavras `toHaveLength(1)`; `:294` ausente `toHaveLength(1)` | PASS+LP ("texto do slide" nao define quais campos; maiusculas e minusculas nao definido; ver defeito D1) |
-| VAL-08 | `forbidden-char` com o caractere para U+2014, U+2013, U+2192, U+21D2 e a sequencia hifen-maior | `tests/validate.test.ts:354-358` para os 5 casos `toHaveLength(1)`, `{severity:"error", slide:2}`, `message toContain(ch)`; `:360-378` em todo campo textual, incluindo `source`, `handle` e `author` | PASS |
-| VAL-09 | `slide-count` fora de 3 a 10 | `tests/validate.test.ts:139-141` 2 falha com `slide: 0`; `:145` 3 passa; `:149` 10 passa; `:153` 11 falha; `:157-158` 0 e 1 falham | PASS |
-| VAL-10 | Aviso `structure` sem mudar a saida | `tests/validate.test.ts:166` `{severity:"warning", slide:1}`; `:172` `{severity:"warning", slide:3}`; `:182-183` sem erro e deck devolvido; `tests/cli.test.ts:68` `code toBe(0)` | PASS |
-| VAL-11 | `source-too-long` acima de 80 caracteres | `tests/validate.test.ts:320` 80 passam; `:324-326` 81 falham `{severity:"error", slide:2}`; `:330-336` 80 e 81 emojis (pontos de codigo) | PASS |
-| VAL-12 | Com `--facts`, numero fora de `source` ausente dos fatos gera `number-not-in-facts` com o numero | `tests/validate.test.ts:416-419` `toHaveLength(1)`, `{severity:"error", slide:2}`, `message toContain("47")`; `:437-442` separadores como escritos; `:448-449` `source` fora da conferencia; `tests/cli.test.ts:93-94` `/^error slide 2 number-not-in-facts: .*47/` | PASS+LP (a spec nao diz se "aparece" e substring ou token; `:444-446` fixa substring, ver FURO F1) |
-| VAL-13 | Sem `--facts`, aviso `facts-skipped` uma vez, sem falhar | `tests/validate.test.ts:477-480` `toHaveLength(1)` com dois slides numerados, `{severity:"warning", slide:2}`; `:483-485` sem erro; `tests/cli.test.ts:76-78` `code toBe(0)`, `toHaveLength(1)`, `/^warning slide 2 facts-skipped: /` | PASS |
-| VAL-14 | Ler a entrada sem executar codigo dela | `tests/schema.test.ts:65-88` `__proto__` e `constructor.prototype` sem poluicao; `tests/security-static.test.ts:75` `expect(await scan(src)).toEqual([])`; `src/schema.ts:38` so `JSON.parse` | PASS |
+**Status**: 31 PASS, 5 PASS+LP, 2 GAP (VAL-12, DOC-05). Spec-anchored: 36 de 38 ACs com o resultado definido pela spec e evidencia; os 2 GAP sao defeitos.
 
-### P1: Gerar PNG e PDF sem navegador
+### Lacunas de precisao da spec
 
-| ID | Resultado definido pela spec | `file:line` + asserção | Resultado |
-| -- | ---------------------------- | ---------------------- | --------- |
-| RND-01 | Validacao primeiro; aborta com o codigo do validador | `tests/cli-render.test.ts:38` `code toBe(1)`, `:40` `readdir(out)).rejects.toThrow()`; `:49-51` numero fora dos fatos `toBe(1)`; `:152` arquivo ilegivel `toBe(2)` | PASS |
-| RND-02 | PNG `NN-<type>.png` a partir de 01, com largura e altura exatas | `tests/cli-render.test.ts:63-71` `toEqual(["01-hook.png", ..., "06-cta.png", "carousel.pdf"])`; `tests/e2e.test.ts:46` `toEqual({ width: 1080, height: 1080 })`; `:56` `toEqual({ width: 1080, height: 1350 })`; `tests/render.test.ts:65` | PASS |
-| RND-03 | `out/carousel.pdf` com uma pagina por slide | `tests/e2e.test.ts:49` `(pdf.match(/\/Type \/Page(?![s])/g)).length toBe(6)`; `tests/cli-render.test.ts:74-75` 6 paginas e `/MediaBox [0 0 1080 1080]` | PASS |
-| RND-04 | Texto do rodape no PNG e no PDF | `tests/layout-footer.test.ts:18` `collectStrings(node!)).toEqual(["Fonte: Relatório 2025, p. 4"])`; `tests/layout-helpers.test.ts:112` `toContain("Fonte: Relatório 2025, p. 4")`; `tests/render.test.ts:158` PNG com source difere do PNG sem source | GAP (PNG provado. Nenhuma asserção abre uma pagina do PDF. O PDF recebe os mesmos pixels por `src/cli.ts:151`, mas nada no teste prova o rodape la) |
-| RND-05 | Trecho destacado na cor de destaque do tema | `tests/layout-helpers.test.ts:126` `expect(found[0]!.props.style?.color).toBe(ctx.tokens.accent)`; `tests/layout-hook.test.ts:35` idem; inspecao visual: destaque amarelo no PNG | PASS+LP (prova na arvore de layout, nao em pixel; ver defeito D1 sobre highlight no `author`) |
-| RND-06 | Texto da entrada so como caracteres, nunca elemento | `tests/render.test.ts:145-149` `expect(svg).not.toContain("<script")`, `"<img"`, `"<foreignObject"`, `"onerror"`, `"onmouseover"` para os 6 tipos; `tests/layout-helpers.test.ts:151` `assertNoInjectedElements` | PASS |
-| RND-07 | Conclui em container `--network none` com fontes do repositorio | `scripts/carousel.sh:35` `--network none`; `scripts/selftest.ts:20-25` fetch bloqueado, executado: 5 de 5 ok; `src/render.ts:44` `readFile(join(ROOT, f.file))`; render do exemplo executado por mim no container sem rede, saida 0 | PASS (evidencia por execucao de comando, nao por teste automatizado em `bun test`) |
-| RND-08 | Falha em qualquer etapa: saida diferente de zero, nomeia a etapa, sem `carousel.pdf` | `tests/cli-render.test.ts:99-100` PDF velho some e `ls(out)).toEqual([])`; `:111` `code toBe(3)`, `:113` `startsWith("error: render failed:")`, `:114` `toContain("slide 2")`, `:115` `ls(out)).toEqual([])`; `:123-124` `toBe(3)` e `startsWith("error: write failed:")` | PASS (a etapa `pdf`, `src/cli.ts:153`, nao tem teste; M13 sobreviveu) |
-| RND-09 | Mesmo slides.json duas vezes: PNGs identicos byte a byte e PDFs com mesmo numero e tamanho de paginas | `tests/e2e.test.ts:69` `expect((await readFile(join(a, f))).equals(await readFile(join(b, f)))).toBe(true)` para todos os arquivos, incluindo o PDF; `tests/render.test.ts:88` | PASS (mais forte que a spec: PDF byte a byte; so duas execucoes na mesma maquina e imagem) |
-| RND-10 | Imprime `slide <i>/<n>` por slide | `tests/cli-render.test.ts:86` `toEqual(["slide 1/6", ..., "slide 6/6"])`; `tests/e2e.test.ts:99` `toContain("slide 6/6")` | PASS |
-| RND-11 | `light`: fundo claro e texto escuro; `dark`: o inverso | `tests/theme.test.ts:29-30` `luminance(tokens.background) toBeLessThan(0.1)` e `luminance(tokens.text) toBeGreaterThan(0.8)`; `:35-36` o inverso para light; `tests/render.test.ts:99` `bandIsBackground(...)).toBe(true)` por tema; inspecao visual dos dois temas | PASS |
+- VAL-12 nao diz se o sinal do lado dos fatos entra na comparacao, nem se a unidade pode ter um espaco antes (`5 K`), nem trata digitos colados a letras (`Q4`, `COVID19`), nem diz o que fazer com unidade fora da lista fechada. O codigo adiciona `×` (U+00D7) e aceita um espaco (`\s?`) sem a spec dizer.
+- VAL-12 define "inteiro" so por digitos e decimais; nao cobre "unidade que e prefixo de outra" (causa do FURO 1).
+- VAL-15 diz "um texto" mas o codigo so olha os campos de numero (fora `source` e `highlight`).
+- RND-04 e RND-05 nao dizem se a prova e em pixel ou em no do layout.
+- VAL-08 lista blocos de setas, mas o teste so amostra alguns.
 
-### P2: Repositorio seguro
+## Achados da rodada 1: foram corrigidos?
 
-| ID | Resultado definido pela spec | Evidencia | Resultado |
-| -- | ---------------------------- | --------- | --------- |
-| SEC-01 | Ordem: instalacao congelada sem scripts, typecheck, testes, exemplo sem rede, trivy | `.github/workflows/ci.yml:30` `bun install --frozen-lockfile --ignore-scripts`, `:33` `bunx tsc --noEmit`, `:36` `bun test`, `:39` `scripts/carousel.sh render examples/slides.json --facts examples/facts.md --out out`, `:55` trivy-action; actionlint saida 0 | PASS por leitura. O CI nunca rodou no GitHub |
-| SEC-02 | Trivy HIGH ou CRITICAL falha o CI | `.github/workflows/ci.yml:60` `severity: HIGH,CRITICAL`, `:61` `exit-code: "1"` | PASS por leitura. Nunca rodou no GitHub. Varredura local registrada em `docs/dependencies.md` (0 achados em 2026-10-14) |
-| SEC-03 | Actions por SHA completo com tag em comentario e `permissions: contents: read` | `.github/workflows/ci.yml:8-9` `permissions: contents: read`; `:20`, `:25`, `:55` tres SHAs de 40 caracteres (conferido por regex) cada um com `# v7.0.1`, `# v2.2.0`, `# v0.36.0` | PASS por leitura. NAO verificado que cada SHA e o commit da tag indicada (sem acesso ao GitHub) |
-| SEC-04 | Dependabot `bun` e `github-actions`, semanal, minor e patch agrupados | `.github/dependabot.yml:3` `package-ecosystem: "bun"`, `:20` `"github-actions"`, `:6` e `:23` `interval: "weekly"`, `:16-18` e `:33-35` `update-types: minor, patch` | PASS por leitura. NAO verificado contra o schema do GitHub (actionlint nao cobre dependabot.yml) |
-| SEC-05 | SECURITY.md com como reportar, LICENSE MIT, THIRD_PARTY_FONTS.md com texto da licenca | `SECURITY.md:7` "Reporting a vulnerability"; `LICENSE:1` "MIT License"; `THIRD_PARTY_FONTS.md:3-9` Inter, OFL-1.1, texto integral abaixo | PASS (fidelidade do texto OFL ao original nao conferida) |
-| SEC-06 | No maximo 4 dependencias diretas; listar diretas e transitivas com versao, licenca e scripts; registrar auditoria das diretas | `package.json:16-19` 2 diretas; `docs/dependencies.md:15-18` tabela com coluna Audit; `:39-63` 25 transitivas. Conferi que as 29 entradas do `bun.lock` estao em `docs/dependencies.md`, cada versao presente. Amostra de 6 pacotes com `npm view <pkg>@<ver> license scripts --json`: satori 0.57.2 MPL-2.0 com `prepare: husky install`; @resvg/resvg-wasm 2.6.2 MPL-2.0 sem scripts; harfbuzzjs 0.10.0 MIT com `prepare: make`; fflate 0.7.3 MIT; css-color-keywords 1.0.0 ISC; typescript 5.9.3 Apache-2.0. Todos batem com a tabela | PASS |
-| SEC-07 | Sem telemetria e sem rede em tempo de execucao | `tests/security-static.test.ts:72-75` varredura de `src/` retorna `[]`; `scripts/carousel.sh:35-38` `--network none --read-only --cap-drop ALL --security-opt no-new-privileges`; selftest executado, 5 de 5 ok | PASS (limites do teste estatico na secao Seguranca) |
+Cada cenario foi reexecutado com `bun src/cli.ts validate` no container (arquivos em `/tmp/.../scratchpad/r1`, fora do repositorio).
 
-### P2: Skill e documentacao
+| Achado | Comando e saida | Estado |
+| ------ | --------------- | ------ |
+| F1 `42%` vs `142%` | `validate f1.json --facts f1.facts` (`Caiu 42%`, fatos `A alta foi de 142%`): `error slide 2 number-not-in-facts: ... "42%" ...`, saida 1 | CORRIGIDO |
+| F2 largura total e arabe-indicos | `４２` com fatos `foram 42`: saida 0 (normalizado, correto). `٤٢`: `error slide 2 non-ascii-digit: ...`, saida 1; `٤٢ e 42`: mesma saida | CORRIGIDO |
+| F3 sinal e sufixos | `-3%` vs `subiu 3%`: erro; `5K` vs `foram 5 mil`: erro; `5 mil` vs `foram 5`: erro; `+7` vs `foram 7`: erro | CORRIGIDO para o que a rodada 1 mostrou; ver FUROS novos (sinal nos fatos, prefixo de unidade) |
+| D1 destaque so no autor ou handle | `quote` com `highlight: "Maria"` so no `author`: `error ... highlight-invalid`; `cta` com `@maria` so no handle: `error ... highlight-invalid`, saida 1 | CORRIGIDO |
+| DOC-05 "(sem CI)" | `grep -rn "sem CI\|without CI" README* SKILL.md docs`: vazio. Texto atual: "Nao encontramos uma pasta `.github` no repositorio". `gh api repos/thallisribeiro/contenthub/contents/.github`: 404, confere | CORRIGIDO (mas ver afirmacoes extras em DOC-05) |
+| RND-04 rodape no PDF | `tests/cli-render.test.ts:157-171` agora compara PDFs com e sem source (`toBe(false)`); mutante X2 morto | CORRIGIDO (prova fraca, "o PDF muda") |
+| Mutantes M07 handle, M08 author | meus M09 e M08 (HIGHLIGHT_FIELDS) mortos | CORRIGIDO |
+| M13 PDF sem arquivo temporario | meu C07 sobreviveu | ESPERADO (nao observavel) |
+| M15 pre-wrap | meu L02 morto | CORRIGIDO |
+| M25 ownProp | meu S02 sobreviveu | ESPERADO (equivalente) |
+| M30 `%` | meu M21 morto | CORRIGIDO |
+| M36 ordenacao | meu M30 morto | CORRIGIDO |
+| M42 hook sem ajuste | meu X1 morto (`tests/render.test.ts:206`) | CORRIGIDO |
+| Lacuna: tracos e setas nao listados | U+2012, U+2015, U+FE58, U+FF0D, U+2794, U+27F6, U+2B62, `=>`, `<-` todos `forbidden-char`, saida 1 | CORRIGIDO |
+| Lacuna: NBSP dentro de numero | `1 000` vs fatos `foram 1000`: erros `"1"` e `"000"` (nao passa); vs `foram 1 000`: passa | CORRIGIDO |
+| Lacuna: item de lista so com U+200B | `field-missing ... "items" must be non-empty strings`, saida 1 | CORRIGIDO |
+| Lacuna: BOM no JSON | arquivo com U+FEFF no inicio: saida 0 | CORRIGIDO (mutante S01 morto) |
+| Lacuna: teste estatico e heuristica | README `Limitacoes conhecidas` e `README.en.md:125` dizem isso; lista de padroes passou de 18 para 25 (`tests/security-static.test.ts:20-45`) | CORRIGIDO |
 
-| ID | Resultado definido pela spec | Evidencia | Resultado |
-| -- | ---------------------------- | --------- | --------- |
-| DOC-01 | Fluxo: fatos com trechos literais, plano com aprovacao, slides.json, validar ate passar, gerar e entregar PDF com lista de fatos | `SKILL.md:23` etapa 1 (trecho literal), `:33` etapa 2 ("PARE e espere o usuario aprovar"), `:37` etapa 3, `:41` etapa 4 ("ate sair com codigo 0"), `:49` etapa 5, `:57` etapa 6 ("o PDF, os PNGs e a lista de fatos") | PASS |
-| DOC-02 | Nunca publicar, nunca inventar numero | `SKILL.md:14` "Nunca publicar, enviar ou agendar nada em rede social"; `:15` "Nunca inventar um numero" | PASS |
-| DOC-03 | Validar e gerar somente pelo script de container | `SKILL.md:16` "Validar e gerar somente com `scripts/carousel.sh`. Nunca rodar `bun src/cli.ts` direto no host"; comandos em `:44` e `:52` | PASS |
-| DOC-04 | README.md e README.en.md com instalacao, exemplo completo, regras do validador e seguranca | `README.md:13,24,68,97` e `README.en.md:13,24,68,97` (mesmas 4 secoes nos dois, 142 e 141 linhas) | PASS |
-| DOC-05 | Compara ao ContentHub e ao gerador auditado, dizendo o que cada um faz, sem afirmar o que nao foi verificado | `README.md:130-136` e `README.en.md:130-136`. Afirmacoes fora da lista verificada: ver secao Documentacao | GAP |
+**Rodada 1: 17 de 17 itens verificaveis corrigidos (2 sobreviventes esperados).** Mas a correcao de F3 abriu a classe de FUROS novos abaixo, e 19 mutantes novos sobrevivem.
 
-**Status**: 35 de 37 ACs com asserção que bate com a spec (5 deles com lacuna de precisao: VAL-02, VAL-06, VAL-07, VAL-12, mais o numero de fonte). 2 GAPs: RND-04 (PDF sem asserção) e DOC-05 (afirmacoes nao verificadas).
+## Sensor de discriminacao
 
-## Edge Cases
+Copias isoladas em `/tmp/.../scratchpad` (`pristine`, `w1` a `w4`), sem `.git`; repositorio real intocado (`git status --short` vazio antes e depois). Um mutante por vez, `bun test` no container sem rede (com a copia mutada montada). MORTO se algum teste falha. Os numeros das linhas sao do arquivo original.
 
-- [x] Arquivo de fatos vazio: `number-not-in-facts` para cada numero. `tests/validate.test.ts:453-458` `toEqual([[1,true],[2,true],[2,true]])`; `tests/cli.test.ts:93-94`.
-- [x] Mesmo numero em dois slides: um achado por slide. `tests/validate.test.ts:462-463` `expect(f.map((x) => x.slide)).toEqual([1, 2])`.
-- [x] Separadores comparados como escritos: `tests/validate.test.ts:438-441` ("2.500" nao e "2,5", nos dois sentidos).
-- [x] Texto longo demais: reduz a fonte ate o minimo e falha com `text-overflow` indicando o slide. `tests/fit.test.ts:17-19` (cai um degrau), `:34-35` `rule toBe("text-overflow")`; `tests/cli-render.test.ts:111-114` `code 3` e `toContain("slide 2")`; `tests/render.test.ts:192-193`. Lacuna de precisao: a spec nao define "minimo do tema"; o codigo usa 50 por cento da fonte base (`src/render.ts:21`, escada `[1, 0.9, 0.8, 0.7, 0.6, 0.5]`). O caminho do hook nao tem teste de overflow (M42 sobreviveu).
-- [x] `out/` ja existe: sobrescreve nomes iguais e nao apaga outros. `tests/cli-render.test.ts:138-139` `notes.txt` mantido, `01-hook.png` sobrescrito.
+**78 mutantes, 57 mortos, 21 sobreviveram.** (2 esperados: C07, S02. 19 outros sao achados.)
 
-## Discrimination Sensor
+| ID | Arquivo:linha | Descricao | Resultado |
+| -- | ------------- | --------- | --------- |
+| M01 | `src/validate.ts:79` | MAX_TEXT_WORDS 40 para 41 | MORTO (`too-many-words (VAL-05) 41 words fail`) |
+| M02 | `src/validate.ts:121` | `words > MAX` para `>=` | MORTO (`40 words pass`) |
+| M03 | `src/validate.ts:80` | MAX_HOOK_LINES 3 para 4 | MORTO (`hook-too-long 4 lines fail`) |
+| M04 | `src/validate.ts:127` | `lines > MAX` para `>=` | MORTO (`3 lines pass`) |
+| M05 | `src/validate.ts:82` | MAX_SOURCE_CHARS 80 para 81 | MORTO (`81 characters fail`) |
+| M06 | `src/validate.ts:143` | `chars > MAX` para `>=` | MORTO (`source-too-long`) |
+| M07 | `src/validate.ts:134` | limite do highlight de 2 para 3 palavras | MORTO (`highlight-invalid (VAL-07)`) |
+| M08 | `src/validate.ts:99` | highlight de quote tambem procura em author | MORTO (`VAL-07 ... quote author`) |
+| M09 | `src/validate.ts:100` | highlight de cta tambem procura em handle | MORTO (`VAL-07 ... cta handle`) |
+| M10 | `src/validate.ts:109` | highlight nao procurado nos itens da lista | MORTO (`VAL-07 ...`) |
+| M11 | `src/validate.ts:155` | FORBIDDEN sem U+2015 | MORTO (`VAL-08 dashes and arrows`) |
+| M12 | `src/validate.ts:160` | FORBIDDEN sem a sequencia hifen e maior-que | MORTO (`Independent Test`) |
+| M13 | `src/validate.ts:166` | ARROW_CHARS sem U+2B60 a U+2BAF | MORTO (`VAL-08 dashes and arrows`) |
+| M14 | `src/validate.ts:166` | ARROW_CHARS sem U+2900 a U+297F | **SOBREVIVEU** (bloco de setas da spec sem teste) |
+| M15 | `src/validate.ts:21` | INVISIBLE sem U+2060 | **SOBREVIVEU** (U+2060 sem teste) |
+| M16 | `src/validate.ts:223` | normalizeText sem NFKC | MORTO (`VAL-12 ... full-width`) |
+| M17 | `src/validate.ts:224` | normalizeText sem U+2212 para hifen | **SOBREVIVEU** (sinal de menos Unicode sem teste) |
+| M18 | `src/validate.ts:229` | FOREIGN_DIGIT so arabe-indicos | **SOBREVIVEU** (so um alfabeto testado) |
+| M19 | `src/validate.ts:218` | NUMBER_RE sem o sinal `+` | **SOBREVIVEU** (sem teste de `+5%`) |
+| M20 | `src/validate.ts:218` | NUMBER_RE sem o lookbehind de letra ou digito | MORTO (`VAL-12 ...`) |
+| M21 | `src/validate.ts:211` | UNIT sem `%` | MORTO (`VAL-12 ...`) |
+| M22 | `src/validate.ts:211` | UNIT sem a fronteira final | MORTO (`VAL-12 ... 5 minutos`) |
+| M23 | `src/validate.ts:259` | lookbehind de `factsContain` sem a parte decimal | MORTO (`VAL-12 ...`) |
+| M24 | `src/validate.ts:259` | lookahead de `factsContain` sem a unidade | MORTO (`VAL-12 ...`) |
+| M25 | `src/validate.ts:259` | lookahead de `factsContain` sem a parte decimal depois | **SOBREVIVEU** (`5` contra fatos `5,5` sem teste) |
+| M26 | `src/validate.ts:225` | normalizeText mantem caracteres de largura zero | **SOBREVIVEU** (sem teste de U+200B dentro de numero) |
+| M27 | `src/validate.ts:24` | isBlank so com `trim()` | MORTO (`blank detection`) |
+| M28 | `src/validate.ts:234` | numberFields sem `handle` | MORTO (`VAL-12 every visible field`) |
+| M29 | `src/validate.ts:319` | `facts-skipped` repetido | MORTO (`facts-skipped (VAL-13)`) |
+| M30 | `src/validate.ts:332` | achados sem ordenar por slide | MORTO (`findings come back ordered`) |
+| M31 | `src/validate.ts:6` | MIN_SLIDES 3 para 2 | MORTO (`slide-count`) |
+| M32 | `src/validate.ts:7` | MAX_SLIDES 10 para 11 | MORTO (`slide-count`) |
+| M33 | `src/validate.ts:298` | aviso `structure` vira erro | MORTO (`structure warning`) |
+| M34 | `src/validate.ts:8` | MAX_LIST_ITEMS 6 para 7 | MORTO (`field-missing`) |
+| M35 | `src/validate.ts:171` | allTexts sem `source` | MORTO (`forbidden-char ... source`) |
+| M36 | `src/validate.ts:312` | regra `non-ascii-digit` desligada | MORTO (`VAL-12 non ASCII digits`) |
+| M37 | `src/validate.ts:287` | slide de tipo desconhecido sem varredura de proibidos | MORTO (`a slide with an unknown type is still scanned`) |
+| M38 | `src/validate.ts:126` | quebra final do hook contada | MORTO (`a trailing line break does not count`) |
+| M39 | `src/validate.ts:86` | palavras separadas so por espaco simples | MORTO (`words are separated by any whitespace`) |
+| M40 | `src/validate.ts:142` | source contado em unidades UTF-16 | MORTO (`80 emoji pass`) |
+| X4 | `src/validate.ts:234` | campo `value` fora da conferencia de numeros | MORTO (`RND-01 ... a number outside the facts file`) |
+| S01 | `src/schema.ts:39` | BOM nao removido | MORTO (`schema: a JSON byte order mark`) |
+| S02 | `src/schema.ts:22` | `ownProp` le nomes herdados (M25 da rodada 1) | SOBREVIVEU, ESPERADO (equivalente, `Object.hasOwn` sobre JSON.parse) |
+| C01 | `src/cli.ts:79` | codigo de saida do validate com erro de 1 para 2 | MORTO (`runValidate (VAL-01)`) |
+| C02 | `src/cli.ts:68` | arquivo ilegivel sai 1 em vez de 2 | MORTO (`unreadable files (VAL-03)`) |
+| C03 | `src/cli.ts:162` | falha do pdf sai 1 em vez de 3 | MORTO (`RND-08 injected step failures`) |
+| C04 | `src/cli.ts:129` | PDF antigo nao removido | MORTO (`stale PDF ... removed`) |
+| C05 | `src/cli.ts:178` | limpeza do PDF apos falha de escrita removida | SOBREVIVEU (praticamente equivalente: o PDF so existe depois do rename, ultimo passo) |
+| C06 | `src/cli.ts:170` | indice do PNG com 3 digitos | MORTO (`RND-02 and RND-03 outputs`) |
+| C07 | `src/cli.ts:173` | PDF gravado sem arquivo temporario (M13 da rodada 1) | SOBREVIVEU, ESPERADO (nao observavel) |
+| C08 | `src/cli.ts:120` | uso errado do render sai 1 em vez de 2 | MORTO (`edge cases`) |
+| C09 | `src/cli.ts:148` | falha de validacao no render sai 2 em vez de 1 | MORTO (`RND-01`) |
+| L01 | `src/layout/common.ts:80` | `boxSizing` removido | MORTO (testes de layout e margens) |
+| L02 | `src/layout/common.ts:50` | `pre-wrap` para `normal` | MORTO (testes de layout) |
+| L03 | `src/layout/common.ts:19` | highlight com `lastIndexOf` | MORTO (`only the first occurrence is highlighted`) |
+| L04 | `src/layout/common.ts:37` | `highlightFirst` destaca todos | MORTO (testes de layout) |
+| X3 | `src/layout/common.ts:23` | span do destaque com a cor do texto | MORTO (`highlight becomes an accent span`) |
+| X2 | `src/layout/footer.ts:9` | rodape nunca desenhado | MORTO (`RND-04 source footer`) |
+| P01 | `src/pdf.ts:23` | alfa nao composto sobre branco | MORTO (`alpha is composited over white`) |
+| P02 | `src/pdf.ts:92` | offset da entrada xref +1 | MORTO (`every xref entry points to the start`) |
+| P03 | `src/pdf.ts:90` | offset do `startxref` +1 | MORTO (`startxref points to the xref keyword`) |
+| P04 | `src/pdf.ts:75` | MediaBox com largura e altura trocadas | MORTO (`MediaBox matches width and height`) |
+| F01 | `src/fit.ts:50` | quebra de linha `<` em vez de `<=` | MORTO (`text exactly at the line limit fits`) |
+| F02 | `src/fit.ts:73` | altura `<` em vez de `<=` | **SOBREVIVEU** (limite exato de altura sem teste) |
+| F03 | `src/fit.ts:12` | largura estimada de 0.6 para 0.5 | MORTO (`default estimate is 0.6 em`) |
+| R01 | `src/render.ts:21` | piso da escada de fonte de 0.5 para 0.4 | **SOBREVIVEU** (spec registra 0,5 como valor da implementacao) |
+| R02 | `src/render.ts:76` | share do corpo do text 0.65 para 0.9 | **SOBREVIVEU** |
+| R03 | `src/render.ts:86` | share da lista 0.7 para 0.95 | **SOBREVIVEU** |
+| R04 | `src/render.ts:86` | indentacao da lista 72 para 0 | **SOBREVIVEU** |
+| R05 | `src/render.ts:90` | share da citacao 0.7 para 0.95 | **SOBREVIVEU** |
+| R06 | `src/render.ts:95` | share do cta 0.6 para 0.9 | **SOBREVIVEU** |
+| R07 | `src/render.ts:80` | share do valor do number 0.6 para 0.9 | **SOBREVIVEU** |
+| R08 | `src/render.ts:24` | BOTTOM_ROW 64 para 0 | **SOBREVIVEU** |
+| R09 | `src/render.ts:117` | escala combinada por `max` em vez de `min` | MORTO (testes de render) |
+| R10 | `src/render.ts:72` | share do hook 1 para 1.5 | **SOBREVIVEU** |
+| X1 | `src/render.ts:72` | texto do hook sem ajuste (M42 da rodada 1) | MORTO (`a hook that cannot fit fails with text-overflow`) |
+| T01 | `src/theme.ts:49` | padding de 88 para 40 | **SOBREVIVEU** (`toBeGreaterThan(0)` apenas) |
+| T02 | `src/theme.ts:12` | altura do retrato 1350 para 1349 | MORTO (`portrait format gives 1080x1350`) |
 
-Profundidade: execucao completa de fault injection manual (45 mutantes, mais que o minimo de 10 e o piso de 5 de caminho critico). Cada mutante numa cópia isolada (`scratchpad/.../w_Mxx`, sem `.git`), rodando `bun test` completo no container sem rede, 4 em paralelo, um mutante por vez em cada cópia. Linhas sao do arquivo original.
+**Profundidade do sensor**: completa (78 mutantes, nucleo P0 de integridade de dados). **Resultado**: 57 de 78 mortos, FAIL: 19 sobreviventes alem dos 2 esperados (M14, M15, M17, M18, M19, M25, M26, F02, R01 a R08, R10, T01, mais C05 quase equivalente).
 
-| # | file:line | Descricao | Resultado |
-| - | --------- | --------- | --------- |
-| M01 | `src/validate.ts:103` | limite de 40 palavras: `>` vira `>=` | MORTO (`too-many-words (VAL-05) > 40 words pass`) |
-| M02 | `src/validate.ts:109` | limite de 3 linhas: `>` vira `>=` | MORTO (`hook-too-long (VAL-06) > 3 lines pass`) |
-| M03 | `src/validate.ts:125` | limite de 80 caracteres de source: `>` vira `>=` | MORTO (`source-too-long (VAL-11) > 80 characters pass`) |
-| M04 | `src/validate.ts:133` | FORBIDDEN sem U+2013 | MORTO (`en dash U+2013 is rejected ...`) |
-| M05 | `src/validate.ts:133` | FORBIDDEN sem U+21D2 | MORTO (`double arrow U+21D2 is rejected ...`) |
-| M06 | `src/validate.ts:133` | FORBIDDEN sem a sequencia hifen-maior | MORTO (`ascii arrow is rejected ...`, `Independent Test from the spec`) |
-| M07 | `src/validate.ts:170` | numero ignora o campo `handle` | **SOBREVIVEU** |
-| M08 | `src/validate.ts:170` | numero ignora o campo `author` | **SOBREVIVEU** |
-| M09 | `src/validate.ts:234` | `facts-skipped` sai a cada slide (remove `skippedReported = true`) | MORTO (`facts-skipped (VAL-13) > ... one warning on the first slide`) |
-| M10 | `src/validate.ts:254` | `parseAndValidate` devolve deck mesmo com erro | MORTO (`RND-01 ... a number outside the facts file stops the render` e outros 3) |
-| M11 | `src/cli.ts:120` | remove a limpeza do PDF antigo | MORTO (`RND-08 ... a stale PDF from an earlier run is removed`) |
-| M12 | `src/cli.ts:145` | codigo 3 vira 1 na falha de render | MORTO (`RND-08 ... text that cannot fit fails at the render step`) |
-| M13 | `src/cli.ts:164` | PDF gravado direto, sem arquivo temporario | **SOBREVIVEU** |
-| M14 | `src/layout/common.ts:80` | remove `boxSizing: "border-box"` do frame | MORTO (`nothing leaks into the margins ...`, 5 falhas) |
-| M15 | `src/layout/common.ts:50` | remove `whiteSpace: "pre-wrap"` do textBlock | **SOBREVIVEU** |
-| M16 | `src/fit.ts:73` | fit aceita tamanho que estoura (`boxHeight * 2`) | MORTO (`fitFontSize > newlines are respected`, `one extra character overflows`) |
-| M17 | `src/pdf.ts:23` | remove a composicao do alfa sobre branco | MORTO (`buildPdf > alpha is composited over white`) |
-| M18 | `src/pdf.ts:54` | offset da tabela xref deslocado em 1 | MORTO (`every xref entry points to the start of 'N 0 obj'`) |
-| M19 | `src/validate.ts:116` | highlight aceita 3 palavras | MORTO (`highlight-invalid (VAL-07) > 3 words fail even when present`) |
-| M20 | `src/theme.ts:61` | tema light usa o fundo do dark | MORTO (`light has a light background and dark text`, `contrast of light theme`) |
-| M21 | `src/validate.ts:187` | 10 slides reprovam (`>` vira `>=`) | MORTO (`slide-count (VAL-09) > 10 slides pass`) |
-| M22 | `src/validate.ts:118` | highlight ausente do texto nao reprova | MORTO (`a highlight that is not in the slide fails`) |
-| M23 | `src/cli.ts:68` | arquivo ilegivel sai 1 em vez de 2 | MORTO (`unreadable files (VAL-03)`, `real execution`) |
-| M24 | `src/render.ts:186` | remove o progresso `slide i/n` | MORTO (`RND-10 progress`, 3 falhas) |
-| M25 | `src/schema.ts:22` | `ownProp` le propriedade herdada (`obj[key]`) | **SOBREVIVEU** (provavel equivalente: nenhum nome de campo do schema coincide com nome de `Object.prototype`; nao ha teste com campo herdado) |
-| M26 | `src/cli.ts:161` | nome do PNG com 3 digitos | MORTO (`RND-02 and RND-03 outputs`, 4 falhas) |
-| M27 | `src/layout/footer.ts:9` | rodape nunca desenhado | MORTO (37 falhas, incluindo `RND-04 source footer`) |
-| M28 | `src/layout/common.ts:23` | highlight sem a cor de destaque | MORTO (`highlight becomes an accent span ...`, 6 falhas) |
-| M29 | `src/validate.ts:216` | `structure` vira erro | MORTO (`warnings alone exit 0 ...`) |
-| M30 | `src/validate.ts:165` | regex de numero sem o sufixo `%` | **SOBREVIVEU** |
-| M31 | `src/validate.ts:83` | contagem de palavras so por espaco | MORTO (`extra spaces and edges do not add words`) |
-| M32 | `src/validate.ts:240` | comparacao normaliza separadores | MORTO (`separators are compared exactly as written`) |
-| M33 | `src/theme.ts:73` | `meta.theme` light ignorado | MORTO (`dark and light decks produce different images`) |
-| M34 | `src/validate.ts:39` | accent invalido aceito | MORTO (`bad theme, accent and format are schema-invalid`) |
-| M35 | `src/validate.ts:138` | `source` nao varrido por forbidden | MORTO (`ascii arrow is rejected in every text bearing field`, 5 falhas) |
-| M36 | `src/validate.ts:246` | achados nao ordenados por slide | **SOBREVIVEU** (a spec nao exige ordem; ordem so esta no comentario do codigo) |
-| M37 | `src/validate.ts:205` | slide de tipo desconhecido nao varrido por forbidden | MORTO (`a slide with an unknown type is still scanned`) |
-| M38 | `src/validate.ts:21` | campo so com espacos aceito | MORTO (`a whitespace only string counts as missing`) |
-| M39 | `src/validate.ts:124` | source conta unidades UTF-16 | MORTO (`80 emoji pass`) |
-| M40 | `src/pdf.ts:75` | MediaBox com largura e altura trocadas | MORTO (`the portrait format ... matching page size`, `MediaBox matches width and height`) |
-| M41 | `src/fit.ts:50` | quebra de linha do fit: `<=` vira `<` | MORTO (`text exactly at the line limit fits`) |
-| M42 | `src/render.ts:71` | hook nunca passa pelo ajuste de texto | **SOBREVIVEU** |
-| M43 | `src/validate.ts:200` | qualquer `type` string aceito | MORTO (`type-unknown`, 3 falhas) |
-| M44 | `src/render.ts:171` | PNG com metade da largura | MORTO (`RND-02 PNG per slide with the exact format size`, 9 falhas) |
-| M45 | `src/cli.ts:159` | render apaga outros arquivos de `out/` | MORTO (`edge cases > existing files with other names in out/ are kept`) |
+## Adversarial novo sobre o validador (copia isolada, sem editar)
 
-**Resultado**: 45 injetados, 37 mortos, **8 sobreviveram** (M07, M08, M13, M15, M25, M30, M36, M42). Veredito do sensor: FAIL.
+### 4.a Falsos positivos (texto legitimo; cada linha foi com fatos contendo o mesmo texto)
 
-Leitura dos sobreviventes (viram tarefas de correcao):
+| Entrada | Numero extraido | Resultado | Avaliacao |
+| ------- | --------------- | --------- | --------- |
+| `R$ 1,234,56` como `R$ 1.234,56` | `1.234,56` | passa | razoavel |
+| `Q3 2026` | `2026` (o `3` colado a `Q` e ignorado) | passa | razoavel, mas `Q3` nao e conferido (ver FURO 3) |
+| `COVID-19` | `19` | passa | razoavel |
+| `3D` | `3` | passa | razoavel |
+| `10h30` | `10` (`30` colado a `h` ignorado) | passa | razoavel, minutos nao conferidos |
+| `24/7` | `24`, `7` | passa | razoavel |
+| `1º lugar` | `1` | passa | razoavel |
+| `50-50` | `50` (o segundo `-50` e colado a digito e e lido com o primeiro) | passa | razoavel |
+| `2020-2021` | `2020`, `2021` | passa | razoavel |
+| `+5%`, `-3%` | `+5%`, `-3%` | passam | razoavel |
+| `14/10/2026` | `14`, `10`, `2026` | passa | razoavel |
+| `v2.1.3`, `v3.0`, `v3.1` | `1.3`, `0`, `1` | **reprovado mesmo com a versao nos fatos** (`number-not-in-facts: "1.3"`, `"0"`, `"1"`) | **FALSO POSITIVO**: o numero extraido depois do ponto e recusado por `factsContain` porque nos fatos ele vem precedido de `2.`; a mensagem cita um numero que o autor nunca escreveu |
+| `5 minutos` | `5` | passa | razoavel |
+| `10 mil reais`, `3,5 milhões` | `10 mil`, `3,5 milhões` | passam | razoavel |
+| e-mail `joao2@exemplo.com` | nenhum (digito colado a letra) | passa | razoavel (numero de e-mail nao conferido) |
+| URL `example.com/2026/relatorio-3` | `2026`, `3` | passa se os fatos tem a URL | razoavel |
+| `4 Milhões` (maiuscula) com fatos `4 milhões` | `4` | **reprovado** | falso positivo menor: a maiuscula faz a unidade nao ser lida e os fatos tem `4 milhões` |
+| `12,5 %` com fatos `12,5%` | `12,5 %` | reprovado | consistente com "como escrito" (nao documentado) |
 
-- M07, M08: nenhum teste coloca numero em `handle` (cta) nem em `author` (quote). `tests/validate.test.ts:428-435` cobre hook, title, value, list e texto de quote, mas nao label, author, handle nem texto de cta. VAL-12 exige conferir "um numero dos slides".
-- M30: `tests/validate.test.ts:423` ("30%" com fatos "30% overall") passa mesmo sem o `%` na regex, porque "30" e substring. O nome do teste ("matched with the unit") promete mais do que prova; so o `x` e discriminado (`:424`).
-- M42: nenhum teste faz um hook estourar o ajuste. `text-overflow` do edge case so e provado para slide text (`tests/render.test.ts:181-193`).
-- M15: nenhum teste prova que quebras de linha (`\n`) do hook sobrevivem ao render (commit 5230dcf diz "keep line breaks"). Nem a asserção de estilo nem pixel.
-- M13: nenhum teste prova a gravacao do PDF via arquivo temporario; falha no meio da escrita do PDF nao e simulada.
-- M25: provavel mutante equivalente. Anotado por transparencia.
-- M36: ordem dos achados nao e requisito da spec.
+Numero real nos fatos reprovado: 2 casos (versoes com ponto, unidade com maiuscula).
 
-## Adversarial sobre o validador
+### 4.b Falsos negativos (numero ou unidade nao nos fatos que passa)
 
-Executado na copia isolada, `bun src/cli.ts validate <arquivo> --facts <fatos minimos>` e `render`, container sem rede. Cerca de 70 entradas. Classificacao: FURO = viola a intencao do projeto (nenhum numero sem fonte, nenhum travessao ou seta) por um caminho barato; LACUNA DE PRECISAO = fora do que a spec define com exatidao.
+Todos reproduzidos por execucao (`adv2.ts` e `adv3.ts` na copia isolada).
 
-### FUROS
+| Entrada | Fatos | Resultado | Classe |
+| ------- | ----- | --------- | ------ |
+| `Foram 10 mi` | `foram 10 mil` ou `10 minutos` | passa | **FURO 1** (milhoes vs milhares) |
+| `Foram 4 mil` | `foram 4 milhões` ou `4 milhares` | passa | **FURO 1** |
+| `Foram 5 k` | `foram 5 kg` | passa | **FURO 1** |
+| `Foram 5 M` | `foram 5 Mb` | passa | **FURO 1** |
+| `Foram 3 bi` | `foram 3 bits` ou `3 bilhoes` | passa | **FURO 1** |
+| `Subiu 5%` | `caiu -5%` ou `caiu −5%` | passa | **FURO 2** (sinal nos fatos ignorado) |
+| `Foram 5` | `foram -5` | passa | **FURO 2** |
+| `Valor 1 000 000` | `1 000` | passa (tres numeros `1`, `000`, `000`) | **FURO 3** (milhar por espaco, nao documentado) |
+| `Subiu 5 pp` | `5` | passa | **FURO 3** (unidade fora da lista, nao documentado) |
+| `Foram 5 kg` | `5 g` | passa | FURO 3 (idem) |
+| `Foram 2 trilhões` | `2` ou `2 pessoas` | passa | FURO 3 |
+| `Subiu 15 por cento` | `15` | passa | FURO 3 |
+| `Valor 1e3`, `Valor 1e9` | `1` | passa (so `1` e extraido) | FURO 3 |
+| `Valor 0x10` | `0` | passa | FURO 3 |
+| `Foram 5 anos` | `5 dias` | passa | FURO 3 |
+| `No Q4 de 2026` | `Q3 2026` | passa (`Q4` ignorado) | FURO 3 (digito colado a letra) |
+| `Houve 10h45` | `10h30` | passa | FURO 3 |
+| `ISO27001 vale` | `nada` | passa | FURO 3 |
+| `Foram 3 bi` | `3 mil` | reprovado | correto |
+| `Foram 10x15 cm` | `10` | passa | LIMITACAO (dimensoes) |
+| `Foram 10²` | `103` | reprovado (NFKC vira `102`) | correto |
 
-| ID | Entrada | O que o validador fez | Por que e furo |
-| -- | ------- | --------------------- | -------------- |
-| F1 | Slide com "subiu 42% no ano" e fatos "subiu 142% no ano" | Saida 0, sem achados | `src/validate.ts:240` usa `facts.includes(num)`. "5" passa se qualquer "5" existir nos fatos ("2500", uma URL, uma data). O teste `tests/validate.test.ts:444-446` fixa isso de proposito ("a plain substring"). Esvazia a promessa "numero rastreavel". |
-| F2 | "custou ４２ reais" (U+FF14 U+FF12) e digitos arabe-indicos | Saida 0, nenhum numero detectado | `NUMBER_RE` em `src/validate.ts:165` so tem `\d` ASCII. O leitor ve um numero; o validador nao. Bypass barato. |
-| F3 | "caiu -3% no ano" com fatos "3%"; "faturou 5K" com fatos "5 mil" | Saida 0 | O sinal e os sufixos fora da regex (`K`, `B`, `mil`) sao descartados, e so os digitos sao comparados (junto com F1). "3.5B" vira "3.5" e "R$1.200" vira "1.200". |
+Documentacao: `README.md` e `README.en.md` (secoes Limitacoes conhecidas) e `SKILL.md` (Limitacoes a avisar) citam so numero por extenso e o teste estatico. **Nenhum dos itens acima esta documentado**, nem que o sinal e a unidade dos fatos nao sao comparados, nem que digito colado a letra e ignorado, nem que `1 000 000` conta como tres numeros.
 
-### LACUNAS DE PRECISAO (spec nao define, nao e defeito de codigo)
+### 4.c Desempenho e ReDoS (timeout de 60 s)
 
-| ID | Entrada | Resultado |
-| -- | ------- | --------- |
-| L1 | U+2012, U+2015, U+2212, U+FE58, U+FF0D, U+FE63, U+2E3A, U+2E3B (tracos) | Passam. A spec lista so U+2014 e U+2013. |
-| L2 | U+27F6, U+2794, U+2B62, U+2190, U+2194, U+21D4, U+27A1 e `=>`, `<-` (setas) | Passam. A spec lista so U+2192, U+21D2 e a sequencia hifen seguido de sinal de maior. Dois hifens seguidos de sinal de maior sao barrados porque contem essa sequencia. |
-| L3 | "custa 1 000" e "1" U+00A0 "000" e U+2009 | O numero e quebrado em "1" e "000" e cada parte e conferida por substring. Passa quando os fatos tem os dois pedaços. A spec nao fala de separador por espaco. |
-| L4 | "trinta mil", "capitulo XLII", "cinquenta por cento" | Passam. Numero por extenso e romano estao fora da spec. |
-| L5 | Numero so em `source` ("Fonte 2025 pagina 14, 87%") | Passa por desenho: VAL-12 exclui `source`. `SKILL.md:19` reconhece o buraco. |
-| L6 | `handle` com numero e `author` com numero | Sao conferidos pelo codigo (`src/validate.ts:170`); a spec nao diz quais campos. Sem teste (M07 e M08). |
-| L7 | Campos extras (`notes`, `extra`), chaves `__proto__` e `constructor` | Ignorados, nao desenhados, sem poluicao (rodei: saida 0, sem erro). Nenhum furo. O texto de campo extra com travessao e numero nao chega ao PNG. |
-| L8 | 11 slides | `error slide 0 slide-count` correto. |
-| L9 | Lista com item `"​"` (ZWSP) | `trim()` nao remove U+200B, item "vazio" passa. Spec diz "item em branco" sem definir. |
-| L10 | 60 palavras unidas por U+200B | Conta 1 palavra, passa `too-many-words`; o render falha com `text-overflow` (codigo 3), entao nao gera PDF errado. |
-| L11 | Caracteres de controle (U+0000, U+0007, U+001B) e U+202E em texto | Validador passa; render conclui saida 0 (4 arquivos). A spec nao define. |
-| L12 | JSON com BOM | `schema-invalid: not valid JSON`. Usabilidade, spec nao define. |
-| L13 | JSON de 6 MB (3 milhoes de palavras) e aninhamento de 100000 niveis | 329 ms com `too-many-words` correto; o aninhamento profundo devolveu achados sem travar. Sem negacao de servico observada. |
-| L14 | Chave duplicada (`"text"` duas vezes) | Vale a ultima, semantica normal de `JSON.parse`; o numero do valor final e conferido. |
-| L15 | Hook de 2 linhas em `\n` | Sai com 4 linhas no PNG (inspecao visual). `hook-too-long` conta so `\n`. |
+Entradas de 1 MB (`1.` x 500000, `9` x 1000000, `1,` x 500000, `1 ` x 500000, `1 mil ` x 170000, `a1` x 500000, `-` x 1000000, `1.2,` x 250000, `1x` x 500000) contra fatos de 5 MB (linhas repetidas, so `9`, so `1.`) e contra um fato de 1 byte. Pior caso medido: 2,30 s (`9` x 1000000 com 5 MB de fatos) e 3,32 s (`1.` x 500000, execucao fria). Uma execucao fria de `9` x 1000000 levou 5,28 s, mas 3 repeticoes deram 0,94, 0,82 e 0,86 s; o tempo de partida do container e 0,30 s. **Nenhuma entrada passou de 5 s de forma reprodutivel; sem ReDoS.** Linha fria acima de 5 s uma vez: observacao, nao achado.
+
+### 4.d Entradas da rodada 1 repetidas
+
+- `__proto__` e `constructor` no deck (raiz, slide, meta): saida 0 e sem poluicao; `type: "constructor"`, `"__proto__"`, `"toString"`: `type-unknown` por slide, saida 1; `highlight: "constructor"`: `highlight-invalid`. OK.
+- Deck de 11 slides: `error slide 0 slide-count: deck has 11 slides, it must have 3 to 10`, saida 1. OK.
+- Caracteres de controle (NUL, TAB, BEL, ESC) e U+202E, U+0085 no texto: o validador aceita (saida 0). A spec nao os proibe. LACUNA DE PRECISAO: o override bidirecional U+202E e aceito e nao ha regra; nao medi o efeito no render.
+
+### Classificacao
+
+- **FURO** (contraria o proposito "nenhum numero sem fonte"): FURO 1 (prefixo de unidade nos fatos, `src/validate.ts:259`), FURO 2 (sinal dos fatos, `src/validate.ts:259`), FURO 3 (unidades fora da lista, milhar por espaco, `1e3`, digitos colados a letras, `src/validate.ts:211` e `:218`), por nao estarem avisados na documentacao.
+- **LIMITACAO documentada**: numero por extenso (README, SKILL), gancho que quebra mais linhas, texto do PDF vira imagem, teste estatico e heuristica.
+- **LACUNA DE PRECISAO**: ver secao acima; U+202E e controles aceitos.
+- **Falsos positivos**: 2 (versoes com ponto, unidade com maiuscula).
 
 ## Seguranca e isolamento
 
-- `scripts/carousel.sh selftest` executado: 5 de 5 "ok" (rede e DNS bloqueados, codigo somente leitura, caminhos da imagem nao graváveis, `/out` gravavel), saida 0.
-- `scripts/carousel.sh:35-45` (SECURE): `--network none`, `--read-only`, `--cap-drop ALL`, `--security-opt no-new-privileges`, `--pids-limit 256`, `--memory 1g`, `--tmpfs /tmp:rw,noexec,nosuid`, `--user` do chamador. `:88` codigo montado `readonly`; `:94` fatos `readonly`; `:103` so `/out` gravavel. Cumpre SEC-07 e RND-07. Imagem fixada por digest (`:17`).
-- `render` do exemplo e render com numero fora dos fatos executados pelo script: ver Success Criteria.
-- Observacoes (nao bloqueiam): (a) o teste estatico `tests/security-static.test.ts` e uma lista de regex. Detecta 14 padroes (`tests/security-static.test.ts:22-37`; `:79-89` provam a deteccao de cada regra num arquivo temporario; `:97-102` provam que as amostras nao aparecem inteiras no proprio teste). Nao detecta `Bun.spawn`, `Bun.connect`, `Bun.serve`, `node:tls`, `node:http2`, `node:worker_threads`, `EventSource`, `navigator.sendBeacon` nem `globalThis["fe"+"tch"]`. Varre so `src/`, nao `scripts/`. A defesa real e o `--network none`. (b) `CAROUSEL_IMAGE` permite trocar a imagem por variavel de ambiente (`scripts/carousel.sh:17`). (c) O check "image paths outside /tmp and /out are not writable" passa para qualquer usuario nao-root (o proprio `scripts/selftest.ts:31-32` avisa).
-- SEC-01 a SEC-03: verificados so por leitura e actionlint. O CI nunca rodou no GitHub. O SHA de cada action nao foi conferido contra a tag (sem acesso ao GitHub). A versao padrao do trivy dentro de trivy-action nao foi verificada.
-- SEC-04: o campo `bun` de `package-ecosystem` e os agrupamentos nao foram validados contra a documentacao do GitHub nem por ferramenta.
+- `scripts/carousel.sh selftest`: 5 de 5 `ok` (rede e DNS bloqueados, `/app` somente leitura, `/etc` nao gravavel, `/out` gravavel).
+- `scripts/carousel.sh:35-45` implementa `--network none`, `--read-only`, `--cap-drop ALL`, `no-new-privileges`, `--pids-limit`, `--memory`, tmpfs `noexec`, usuario nao root, codigo montado com `,readonly` (SEC-07 e RND-07). `validate` e `render` montam so o diretorio de saida como gravavel. A imagem e fixada por digest.
+- `tests/security-static.test.ts:20-45` tem 25 padroes (eval, `new Function`, import dinamico, child_process, fetch, XMLHttpRequest, WebSocket, node:http/https/net/dgram/dns/tls/http2/vm, process.env, Bun.env/spawn/connect/listen/serve, worker_threads, `Function(`, `globalThis[`); o teste cria um arquivo com cada amostra (`:92-98`) e exige o achado, e confere que as amostras nao aparecem inteiras no proprio teste. Heuristica, como declarado.
+- `.github/workflows/ci.yml`: SEC-01 a SEC-03 por leitura e actionlint, SHAs conferidos com `gh api` (todos batem, trivy-action via tag anotada). **O CI nunca rodou no GitHub.**
+- `.github/dependabot.yml` cumpre SEC-04; `docs/dependencies.md` cumpre SEC-06 (amostra de 7 conferida com `npm view`); SECURITY.md, LICENSE e THIRD_PARTY_FONTS.md existem.
+- Nenhum e-mail em nenhum arquivo do projeto fora de `node_modules` e `.git` (grep vazio).
 
 ## Documentacao
 
-- DOC-01 a DOC-04: PASS (tabela acima). `SKILL.md:15` diz que todo numero deve estar nos fatos "escrito do mesmo jeito"; o validador faz substring (F1), entao a promessa do SKILL e mais forte que o comportamento.
-- `grep -rnP "\x{2014}|\x{2013}|\x{2192}"` fora de `.specs`, `node_modules`, `.git` e `THIRD_PARTY_FONTS.md`: **zero ocorrencias** (inclui `tests/`, que usa escapes). `.specs/features/v1/tasks.md` contem 46 ocorrencias (pasta excluida pela regra do pedido; registro).
-- DOC-05, seção Comparacao (`README.md:130-136`, identica em `README.en.md:130-136`). Frases que afirmam sobre terceiros alem da lista verificada (ContentHub: gate factual, carrossel de Instagram, sem pasta .github; threads-carousel-claude-skill: MIT, previa e exportacao no navegador; Slashgear/linkedin-carousel-gen: MIT, Satori e Bun):
-  1. `README.md:134`: "(sem CI)" entre parenteses. A ausencia de pasta `.github` nao prova ausencia de CI (CI pode estar em outro servico). Inferencia.
-  2. `README.md:135`: "previa em navegador (Next.js)". "Next.js" nao esta na lista verificada.
-  3. `README.md:135`: "em formatos de varias redes". Nao esta na lista verificada.
-  4. `README.md:135`: "Este projeto nasceu de uma auditoria de seguranca dele: as regras do validador e a ideia de rodar tudo em container vem desse trabalho." Afirma origem e conteudo de terceiros.
-  5. `README.md:135`: "O codigo foi reescrito para este repositorio (so a expressao regular de numero e o formato da linha de achado coincidem)." Afirmacao sobre o codigo de terceiros, nao verificada neste relatorio (nao ha como conferir sem rede).
-  6. `README.md:136`: "para gerar PDFs de carrossel do LinkedIn". A finalidade do projeto nao esta na lista verificada (o nome sugere, mas nao foi dado como verificado).
-  7. `README.md:132`: "Fatos verificados em 2026-10-14" e uma declaracao de verificacao que este Verifier nao pode confirmar (sem rede).
-  Nada disso e verificavel por mim. A spec exige "sem afirmar o que nao foi verificado", entao DOC-05 e GAP.
-
-## Defeitos
-
-| ID | Defeito | Evidencia | Gravidade |
-| -- | ------- | --------- | --------- |
-| D1 | `highlight` que aparece so no `author` de um quote e aceito pelo validador (`src/validate.ts:89` inclui `author` no haystack) mas nunca desenhado (`src/layout/quote.ts:13` destaca so `slide.text`). Executei: saida 0; o SVG tem 1 ocorrencia da cor de destaque (a barra), contra 2 quando o destaque esta no texto. | execucao no container | Menor (silencioso, viola VAL-07 e RND-05 juntos) |
+- DOC-01 a DOC-04: PASS (tabela acima). READMEs e SKILL.md descrevem `non-ascii-digit`, numero inteiro com sinal e unidade e os tracos e setas ampliados.
+- `grep -rnP "\x{2014}|\x{2013}|\x{2192}"` fora de `.specs`, `node_modules`, `.git` e `THIRD_PARTY_FONTS.md`: vazio.
+- DOC-05, comparacao com terceiros, confronto com a lista verificada (re-conferida com `gh api`: ContentHub sem pasta `.github` (404); threads-carousel MIT; Slashgear MIT):
+  - ContentHub: "tem um gate factual no fluxo e o carrossel dele e para Instagram. Nao encontramos uma pasta `.github`". Dentro da lista.
+  - Slashgear/linkedin-carousel-gen: "MIT, usa Satori e Bun para gerar PDFs de carrossel do LinkedIn". Dentro da lista.
+  - threads-carousel-claude-skill: "licenca MIT", "previa em navegador (Next.js)", "exportacao no navegador, em formatos de varias redes". Dentro da lista. **Alem da lista**: "Este projeto nasceu de uma auditoria de seguranca dele: as regras do validador e a ideia de rodar tudo em container vem desse trabalho. O codigo foi reescrito para este repositorio (so a expressao regular de numero e o formato da linha de achado coincidem)" (`README.md` secao Comparacao; `README.en.md:139`). Nao verifiquei isso: a arvore publica do repositorio (`gh api .../git/trees/HEAD?recursive=1`) mostra `template/` em Next.js e nao tem validador nem testes, entao a origem das "regras do validador" e a afirmacao de que so a regex e o formato coincidem nao tem verificacao por mim. Achado de DOC-05.
 
 ## Success Criteria
 
-- [x] Exemplo `examples/slides.json` com `examples/facts.md` pelo script de container: `scripts/carousel.sh validate` saida 0 sem linhas; `scripts/carousel.sh render` imprimiu `slide 1/6` a `slide 6/6`, saida 0, escreveu `01-hook.png` a `06-cta.png` (todos `PNG image data, 1080 x 1080, 8-bit/color RGBA`) e `carousel.pdf` com 6 paginas (6 objetos `/Type /Page`, 152744 bytes). Rodape de fonte presente nos slides de numero e de texto (inspecao visual).
-- [x] `slides.json` com numero fora dos fatos nunca gera PDF: troquei "42%" por "43%", `render` imprimiu `error slide 2 number-not-in-facts: ... "43%" ...`, saida 1, diretorio de saida vazio.
-- [ ] NAO VERIFICADO: "o primeiro push publico ja tem CI verde e Dependabot ativo". O CI nunca rodou no GitHub e nao ha repositorio remoto.
-- [x] Nenhuma dependencia direta alem das auditadas: 2 diretas em `package.json:16-19`; 29 entradas no `bun.lock`, todas em `docs/dependencies.md`.
-- [ ] NAO VERIFICADO: "num Claude Code limpo, pedir o carrossel e receber o PDF" (teste independente da story de skill). Exige sessao limpa do Claude Code.
-- Divergencia spec x design: o primeiro Success Criterion cita "o carrossel do post da Anthropic". O `design.md` decidiu usar um exemplo ficticio. O criterio da spec, como escrito, nao foi executado.
+- Exemplo (`examples/slides.json` com `examples/facts.md`) pelo script de container: `validate` saida 0; `render` imprime `slide 1/6` a `slide 6/6`, saida 0; 6 PNGs, todos 1080x1080 (leitura do IHDR), `carousel.pdf` de 152744 bytes com 6 paginas (`/Count 6`, 6 objetos `/Type /Page`, `/MediaBox [0 0 1080 1080]`). O slide de numero tem `source`. PASS.
+- Numero fora dos fatos nunca gera PDF: com `out2/carousel.pdf` antigo (conteudo `old`), `render` de um deck com `42%` contra fatos `142%` saiu 1 e a pasta ficou vazia (o PDF antigo sumiu). PASS.
+- "Primeiro push publico com CI verde e Dependabot ativo": NAO VERIFICADO (o CI nunca rodou no GitHub e nao ha push).
+- "Num Claude Code limpo, pedir o carrossel e receber o PDF": NAO VERIFICADO.
+- Dependencias diretas de runtime: 2 (satori, resvg-wasm), transitivas listadas: confere com `docs/dependencies.md`.
 
-## Inspecao visual
+## Inspecao visual (Read em PNG)
 
-Abri 4 PNGs do exemplo (dark, quadrado: `01-hook`, `02-number`, `03-text`, `04-list`) e 3 de um deck temporario fora do repositorio (light, retrato 1080x1350: `02-number`, `03-text` com texto de 40 palavras no limite, `05-quote`).
-
-- Sem texto cortado, sem sobreposicao, margens respeitadas, contador "i/6" no canto inferior direito, rodape "Fonte: ..." no canto inferior esquerdo nos slides com source e ausente nos demais.
-- Contraste bom nos dois temas. Destaque: amarelo no dark, laranja escuro no light, legivel.
-- Hook `E se a reuniao\nsemanal...` (2 linhas informadas) sai em 4 linhas no PNG ("E se a reuniao / semanal / fosse so um / texto?"). Esta dentro da area, mas excede as "3 linhas" do ponto de vista do leitor (lacuna L15, ja conhecida em README e SKILL).
-- Cosmeticos: o contador "i/6" e o rodape (24 px) sao pequenos e de baixo contraste em 1080 px; o slide de citacao no retrato deixa muito espaco vazio. Nenhum defeito bloqueante.
-
-## Code Quality (verificacao pontual)
-
-| Principio | Status |
-| --------- | ------ |
-| Minimo de codigo, sem escopo extra | OK nos arquivos lidos (src/validate.ts, schema.ts, cli.ts, render.ts, pdf.ts, fit.ts, theme.ts, layout/*). |
-| Spec-anchored (valor afirmado bate com a spec) | Com os GAPs e FUROS acima. |
-| Todo teste mapeia a requisito ou edge case | OK; ha testes de robustez extras (ownProp, fonts) justificaveis. |
-| Diretrizes documentadas do projeto | nenhuma encontrada ("strong defaults applied", como em `tasks.md`). |
-
-## Requirement Traceability Update (sugerido; este Verifier nao altera spec.md)
-
-| Requisito | Status atual | Novo status sugerido |
-| --------- | ------------ | -------------------- |
-| VAL-01 a VAL-11, VAL-13, VAL-14 | Implementing | Verificado |
-| VAL-12 | Implementing | Precisa de correcao (F1, F2, F3; M07, M08, M30) |
-| RND-01 a RND-03, RND-05 a RND-11 | Implementing | Verificado (RND-08 e RND-05 com ressalva) |
-| RND-04 | Implementing | Precisa de correcao (PDF sem asserção) |
-| SEC-01 a SEC-03 | In Tasks | Verificado so por leitura e actionlint; nao verificado no GitHub |
-| SEC-04 a SEC-07 | Implementing / In Tasks | Verificado |
-| DOC-01 a DOC-04 | In Tasks | Verificado |
-| DOC-05 | In Tasks | Precisa de correcao |
-
-## Plano de correcao (nao executado)
-
-1. F1: comparar numeros por token (limites de digito e separador), nao por substring; trocar o teste `tests/validate.test.ts:444-446`. Prioridade: Bloqueador.
-2. F2 e F3: normalizar digitos de largura total e passar a conferir sinal e sufixos (`K`, `B`, `mil`) no mesmo criterio da spec; esclarecer a spec. Prioridade: Maior.
-3. DOC-05: reduzir a comparacao do README a lista verificada (ou verificar e citar a fonte de cada frase). Prioridade: Maior.
-4. Testes novos para matar M07, M08 (numero em handle, author, label, texto de cta), M30 (so `%` sem sufixo nos fatos), M42 (hook estourando), M15 (quebra de linha no render), RND-04 no PDF; M13 e M36 opcionais; M25 provavel equivalente. Prioridade: Maior.
-5. D1: ou desenhar o destaque no `author`, ou tirar `author` do haystack de `highlight`. Prioridade: Menor.
-6. Spec: definir se "aparece" e substring ou token; formato do caminho em `schema-invalid`; definicao de "linha" do hook; "minimo do tema". Prioridade: Menor.
-7. Atualizar `tasks.md` (T29, T32 a T37) e a tabela de rastreabilidade do `spec.md`. Prioridade: Cosmetico.
+- Dark, `01-hook.png`: legivel, destaque amarelo em "texto", contagem `1/6` no canto. Defeito: o gancho do exemplo tem 2 linhas por `\n`, mas sai com 4 linhas porque "E se a reuniao semanal" quebra depois de "reuniao" (limitacao documentada, mas o proprio exemplo da documentacao a exibe). Bloco ancorado no centro com muito espaco vazio acima.
+- Dark, `03-text.png`: titulo, corpo com destaque "nota escrita" e rodape "Fonte: exemplo da documentacao" a esquerda; sem corte. Sem defeito.
+- Dark, `04-list.png`: lista numerada com marcadores na cor de destaque, itens quebram com recuo correto. Sem defeito.
+- Light e retrato (1080x1350, accent `#1D4ED8`, deck temporario fora do repositorio), `02-number.png`: numero grande azul, rotulo escuro, rodape de fonte, `2/6`; contraste bom. Sem defeito.
+- Light e retrato, `05-quote.png`: barra azul a esquerda, citacao escura, autor em cinza; muito espaco vazio acima e abaixo (bloco centrado). Sem defeito de legibilidade; so vazio grande.
 
 ## O que NAO foi verificado
 
-- Execucao do CI no GitHub (SEC-01 a SEC-03), correspondencia dos SHAs com as tags, validade do `dependabot.yml` no GitHub.
-- O criterio "num Claude Code limpo, pedir o carrossel e receber o PDF" e o criterio "primeiro push publico com CI verde".
-- Todas as afirmacoes do README sobre ContentHub, threads-carousel-claude-skill e Slashgear (sem rede e fora do escopo de verificacao).
-- Fidelidade do texto OFL em `THIRD_PARTY_FONTS.md` ao original.
-- Reproducibilidade entre maquinas ou arquiteturas diferentes (RND-09 provado so em duas execucoes na mesma maquina e imagem).
-- Selecao e copia de texto do PDF (a spec nao exige; e limitacao documentada).
-- Comportamento em Windows, macOS e Docker rootless.
+- CI no GitHub (nunca rodou) e Dependabot ativo.
+- "Num Claude Code limpo, pedir o carrossel e receber o PDF".
+- Efeito no render de U+202E e caracteres de controle.
+- Aparencia dos 3 PNGs restantes do exemplo (02-number, 05-quote, 06-cta) e dos 4 restantes do deck light: so as amostras acima foram vistas.
+- Origem das "regras do validador" do threads-carousel (item DOC-05).
+- Seguranca do Docker em si.
 
-## Summary
+## Lista ordenada de lacunas (da mais grave para a menos)
 
-**Overall**: Not Ready (FAIL)
+1. FURO 1: unidade que e prefixo de outra passa contra os fatos (`10 mi` vs `10 mil`, `4 mil` vs `4 milhões`, `5 k` vs `5 kg`) - VAL-12 - `src/validate.ts:259`.
+2. FURO 2: sinal dos fatos nao comparado (`5%` passa contra `-5%`) - VAL-12 - `src/validate.ts:259`.
+3. FURO 3: unidades fora da lista, milhar por espaco, `1e3`, digitos colados a letras nao conferidos e sem aviso nos READMEs e no SKILL.md - VAL-12 e DOC-04 - `src/validate.ts:211`, `:218`.
+4. Falso positivo: `v3.0` e `v2.1.3` presentes nos fatos sao reprovados com mensagem confusa - VAL-12 - `src/validate.ts:259`.
+5. Sobreviventes de comportamento exigido pela spec: M14 (VAL-08 bloco U+2900 a U+297F, `src/validate.ts:166`), M19 (sinal `+`, `:218`), M17 (U+2212, `:224`), M18 (VAL-15 so um alfabeto, `:229`), M25 (`5` contra `5,5`, `:259`), M26 e M15 (largura zero, `:225`, `:21`).
+6. DOC-05: afirmacao sobre o threads-carousel fora da lista verificada - `README.md` secao Comparacao, `README.en.md:139`.
+7. Sobreviventes de renderizacao sem teste: fatores de share R02 a R07 e R10 (`src/render.ts:72`, `:76`, `:80`, `:86`, `:90`, `:95`), piso do ajuste R01 (`:21`), BOTTOM_ROW R08 (`:24`), padding T01 (`src/theme.ts:49`), limite exato de altura F02 (`src/fit.ts:73`).
+8. Lacunas de precisao da spec: VAL-12 (sinal nos fatos, espaco antes da unidade, digito colado a letra, unidade fora da lista), VAL-15 ("um texto"), RND-04 e RND-05 (forma da prova), U+202E e controles aceitos.
+9. Exemplo da documentacao exibe o gancho de 2 linhas com 4 linhas no PNG - RND-02 (limitacao documentada) - `examples/slides.json` slide 1.
+10. Sobreviventes esperados: C07 (M13, PDF sem arquivo temporario) e S02 (M25, `ownProp`); C05 quase equivalente.
 
-**Spec-anchored check**: 35/37 ACs com asserção que bate com a spec; 2 GAPs (RND-04, DOC-05); 5 lacunas de precisao da spec (VAL-02, VAL-06, VAL-07, VAL-12, edge case do minimo do tema).
-**Sensor**: 37/45 mutantes mortos, 8 sobreviveram.
-**Gate**: 309 passed, 0 failed; `tsc --noEmit` limpo.
-**Adversarial**: 3 furos (F1 a F3), 15 lacunas de precisao.
+## validate_state.py
 
-**O que funciona**: validador com os limites exatos da spec e bem coberto nos pontos de borda (40, 41, 3, 4, 80, 81, 2, 3, 10, 11); isolamento do container comprovado por selftest; render deterministico e sem PDF em falha; inspecao visual sem defeito bloqueante; dependencias todas listadas e batendo com o npm na amostra.
-
-**Issues**: ver "Por que FAIL" e "Plano de correcao".
+Saida registrada no chat de entrega.
