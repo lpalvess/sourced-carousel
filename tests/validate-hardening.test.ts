@@ -195,3 +195,33 @@ describe("parseAndValidate only returns a deck when there is no error", () => {
     expect(parseAndValidate(text, "42%").deck).toBeDefined();
   });
 });
+
+describe("round 2 findings: units, signs, versions and capitals", () => {
+  const with_ = (text: string) => deckWith({ type: "text", title: "T", text });
+
+  test("a unit that is the start of a longer word is a different unit", () => {
+    expect(rulesOf(with_("Ganho de 10 mi"), "Ganho de 10 mil")).toEqual(["number-not-in-facts"]);
+    expect(rulesOf(with_("Levou 10 mi"), "Levou 10 minutos")).toEqual(["number-not-in-facts"]);
+    expect(rulesOf(with_("Peso 5 k"), "Peso 5 kg")).toEqual(["number-not-in-facts"]);
+    expect(rulesOf(with_("Ganho de 10 mil"), "Ganho de 10 mil")).toEqual([]);
+  });
+
+  test("a minus sign in the facts does not match a plain number on the slide", () => {
+    expect(rulesOf(with_("Caiu 5%"), "caiu -5%")).toEqual(["number-not-in-facts"]);
+    expect(rulesOf(with_("Caiu -5%"), "caiu -5%")).toEqual([]);
+    expect(rulesOf(with_("Caiu -5%"), "subiu 5%")).toEqual(["number-not-in-facts"]);
+  });
+
+  test("a plus sign on the slide is the same claim as a plain number", () => {
+    expect(rulesOf(with_("Subiu +5%"), "subiu 5%")).toEqual([]);
+  });
+
+  test("a version string is not a number, so it is not checked", () => {
+    expect(rulesOf(with_("Versão v3.0 e v2.1.3"), "versão v3.0 e v2.1.3")).toEqual([]);
+  });
+
+  test("a capitalized unit matches the same unit in lower case in the facts", () => {
+    expect(rulesOf(with_("Cerca de 4 Milhões de pessoas"), "4 milhões de pessoas")).toEqual([]);
+    expect(rulesOf(with_("Cerca de 4 Milhões de pessoas"), "4 mil pessoas")).toEqual(["number-not-in-facts"]);
+  });
+});

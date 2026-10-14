@@ -215,7 +215,10 @@ const UNIT = String.raw`(?:%|x|\u00D7|k|K|M|B|milh(?:\u00E3o|\u00F5es)|bilh(?:\u
  * A sign only counts when it is not glued to a letter or digit, so 2020-2021 is two
  * plain numbers and -3% is one signed number.
  */
-const NUMBER_RE = new RegExp(String.raw`(?<![\p{L}\p{N}])[-+]?\d+(?:[.,]\d+)*(?:\s?${UNIT})?`, "gu");
+const NUMBER_RE = new RegExp(
+  String.raw`(?<![\p{L}\p{N}])(?<![\p{L}\p{N}][.,])[-+]?\d+(?:[.,]\d+)*(?:\s?${UNIT})?`,
+  "giu",
+);
 
 /** Compatibility forms (full-width digits, no-break spaces) read as their plain equivalents. */
 function normalizeText(text: string): string {
@@ -256,7 +259,13 @@ function escapeRegExp(s: string): string {
  * decimal part before or after, and with the same unit. 42% is not in "142%" or "42".
  */
 function factsContain(facts: string, token: string): boolean {
-  const re = new RegExp(String.raw`(?<!\d|\d[.,])${escapeRegExp(token)}(?!\d|[.,]\d|\s?${UNIT})`, "u");
+  // A leading + is the same claim as no sign. A leading - must match a minus in the facts,
+  // and a plain number must not be a negative one in the facts.
+  const signed = token.startsWith("-");
+  const body = token.startsWith("+") ? token.slice(1) : token;
+  const before = signed ? "(?<!\\d|\\d[.,])" : "(?<!\\d|\\d[.,])(?<!(?<![\\p{L}\\p{N}])-)";
+  const after = "(?![\\p{L}\\p{N}]|[.,]\\p{N}|\\s?" + UNIT + ")";
+  const re = new RegExp(before + escapeRegExp(signed ? token : body) + after, "giu");
   return re.test(facts);
 }
 
