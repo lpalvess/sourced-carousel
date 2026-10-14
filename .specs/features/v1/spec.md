@@ -38,6 +38,9 @@ Geradores de carrossel para LinkedIn transformam texto em slides, mas nenhum dos
 | Renderização | Satori (JSX para SVG), resvg (SVG para PNG), biblioteca de PDF a decidir no Design após auditoria | Sem navegador. Satori aceita WOFF2 (confirmado no Context7). | y |
 | Fontes variáveis | Usar as WOFF2 variáveis do fork se o Satori respeitar os pesos; senão, instâncias estáticas | Comportamento de fonte variável no Satori não confirmado. Primeira tarefa prova. | n |
 | Licença | MIT, com THIRD_PARTY_FONTS.md para as fontes OFL e crédito a qualquer código MIT reaproveitado | Projeto público. | y |
+| Linhas do gancho | Contadas pelas quebras `\n` do texto. A quebra automática ao renderizar não conta, então um gancho de 2 linhas pode sair com 4 no PNG. | Medir a quebra exigiria medir o texto. Fica como limitação documentada. | y |
+| Números por extenso | Não são conferidos. O validador só enxerga dígitos. | Ler número por extenso em português exigiria uma gramática. A SKILL.md manda escrever com dígitos. | y |
+| Mínimo do ajuste de texto | 0,5 vezes o tamanho base do papel (escada 1, 0,9, 0,8, 0,7, 0,6, 0,5). | Valor da implementação, em src/render.ts. | n |
 | Nome dos comandos | `carousel validate` e `carousel render` | Projeto bilíngue. | y |
 | Repositório no GitHub | Criado só com o OK explícito do Lucas, na hora | Ação externa. | y |
 | Proteção da branch main | Configurada só com o OK explícito do Lucas, na hora | Mudança de configuração no GitHub. | y |
@@ -62,16 +65,17 @@ Geradores de carrossel para LinkedIn transformam texto em slides, mas nenhum dos
 4. IF um slide não tem um campo obrigatório do seu tipo THEN the validator SHALL reportar erro `field-missing` com o nome do campo.
 5. IF um slide text tem mais de 40 palavras THEN the validator SHALL reportar erro `too-many-words`.
 6. IF o texto de um hook tem mais de 3 linhas THEN the validator SHALL reportar erro `hook-too-long`.
-7. IF o highlight tem mais de 2 palavras ou não aparece no texto do slide THEN the validator SHALL reportar erro `highlight-invalid`.
-8. IF qualquer texto contém U+2014, U+2013, U+2192, U+21D2 ou `->` THEN the validator SHALL reportar erro `forbidden-char` com o caractere.
+7. IF o highlight tem mais de 2 palavras ou não aparece em um dos campos em que o layout do tipo o desenha THEN the validator SHALL reportar erro `highlight-invalid`. Os campos são: hook, text; text, title e text; number, value e label; list, title e items; quote, text; cta, text. Um destaque que só existe em `author` ou `handle` é inválido, porque nunca seria desenhado.
+8. IF qualquer texto contém U+2012, U+2013, U+2014, U+2015, U+FE58, U+FF0D, um caractere dos blocos Unicode de setas (U+2190 a U+21FF, U+27F0 a U+27FF, U+2794 a U+27BF, U+2900 a U+297F, U+2B00 a U+2B11, U+2B30 a U+2B4F, U+2B60 a U+2BAF) ou as sequências `->`, `=>` e `<-` THEN the validator SHALL reportar erro `forbidden-char` com o caractere. Hífen simples e o sinal de menos U+2212 são permitidos.
 9. IF o deck tem menos de 3 ou mais de 10 slides THEN the validator SHALL reportar erro `slide-count`.
 10. IF o primeiro slide não é hook ou o último não é cta THEN the validator SHALL reportar aviso `structure` sem alterar o código de saída.
 11. IF `source` tem mais de 80 caracteres THEN the validator SHALL reportar erro `source-too-long`.
-12. WHERE `--facts <arquivo>` é informado, IF um número dos slides, fora de `source`, não aparece no arquivo de fatos THEN the validator SHALL reportar erro `number-not-in-facts` com o número.
+12. WHERE `--facts <arquivo>` é informado, IF um número dos slides, fora de `source`, não aparece inteiro no arquivo de fatos THEN the validator SHALL reportar erro `number-not-in-facts` com o número. Os textos passam por normalização NFKC antes da comparação. O número é a sequência de dígitos com separadores `.` e `,`, mais o sinal (só quando não está colado a letra ou dígito) e a unidade logo depois (`%`, `x`, `K`, `k`, `M`, `B`, `mil`, `mi`, `bi`, `milhão`, `milhões`, `bilhão`, `bilhões`, `thousand`, `million`, `billion`). Aparecer inteiro significa não estar dentro de outro número nem de uma parte decimal, e com a mesma unidade: `42%` não está em `142%`, `42` ou `42,5%`.
 13. WHERE `--facts` não é informado, IF algum slide contém número THEN the validator SHALL imprimir o aviso `facts-skipped` uma vez e SHALL NOT falhar por isso.
 14. The validator SHALL ler a entrada sem executar nenhum código vindo dela.
+15. IF um texto contém, depois da normalização NFKC, um dígito decimal que não é 0 a 9 THEN the validator SHALL reportar erro `non-ascii-digit`.
 
-**Independent Test**: validar um slides.json com travessão, uma seta e um número ausente dos fatos e ver três erros; validar o slides.json do post da Anthropic com o arquivo de fatos do artigo e ver código 0.
+**Independent Test**: validar um slides.json com travessão, uma seta e um número ausente dos fatos e ver três erros; validar o `examples/slides.json` com o `examples/facts.md` (ambos fictícios) e ver código 0.
 
 ---
 
@@ -179,6 +183,7 @@ Geradores de carrossel para LinkedIn transformam texto em slides, mas nenhum dos
 | VAL-12 | P1: Validar | Design | Implementing |
 | VAL-13 | P1: Validar | Design | Implementing |
 | VAL-14 | P1: Validar | Design | Implementing |
+| VAL-15 | P1: Validar | Design | Implementing |
 | RND-01 | P1: Gerar | Design | Implementing |
 | RND-02 | P1: Gerar | Design | Implementing |
 | RND-03 | P1: Gerar | Design | Implementing |
@@ -203,15 +208,15 @@ Geradores de carrossel para LinkedIn transformam texto em slides, mas nenhum dos
 | DOC-04 | P2: Skill e documentação | Design | In Tasks |
 | DOC-05 | P2: Skill e documentação | Design | In Tasks |
 
-**ID format:** `[CATEGORY]-[NUMBER]`. Os ACs de cada story são numerados na ordem: P1 Validar = VAL-01 a VAL-14, P1 Gerar = RND-01 a RND-11, P2 Repositório seguro = SEC-01 a SEC-07, P2 Skill = DOC-01 a DOC-05.
+**ID format:** `[CATEGORY]-[NUMBER]`. Os ACs de cada story são numerados na ordem: P1 Validar = VAL-01 a VAL-15, P1 Gerar = RND-01 a RND-11, P2 Repositório seguro = SEC-01 a SEC-07, P2 Skill = DOC-01 a DOC-05.
 
-**Coverage:** 37 total, 37 mapped to tasks, 0 unmapped.
+**Coverage:** 38 total, 38 mapped to tasks, 0 unmapped.
 
 ---
 
 ## Success Criteria
 
-- [ ] O carrossel do post da Anthropic sai em PDF a partir do slides.json e do arquivo de fatos, no container sem rede, com rodapé de fonte nos slides de número.
+- [ ] O carrossel de exemplo (fictício, em `examples/`) sai em PDF a partir do slides.json e do arquivo de fatos, no container sem rede, com rodapé de fonte nos slides de número.
 - [ ] Um slides.json com número fora dos fatos nunca gera PDF.
 - [ ] O primeiro push público já tem CI verde e Dependabot ativo.
 - [ ] Nenhuma dependência direta de runtime além das 4 auditadas, e todas as transitivas listadas.

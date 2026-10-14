@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: `.specs/features/v1/design.md`
-**Status**: In Progress (T1 a T28, T30 e T31 feitas; faltam T29, T32 a T37)
+**Status**: In Progress (T1 a T37 feitas e integradas; verificação independente reprovou na rodada 1, correções T38 a T41 feitas; falta a rodada 2)
 
 **Regras do projeto (valem para toda tarefa):** código de terceiros só roda em container; commits em Conventional Commits em inglês com a identidade noreply do Lucas; nenhum push, nenhum repositório remoto e nenhuma configuração do GitHub sem OK explícito do Lucas; nenhum travessão nem seta em texto escrito; nenhuma afirmação sobre terceiros que não tenha sido verificada.
 
@@ -146,6 +146,17 @@ T33 → T34
 T34 → T35
 T35 → T36
 T36 → T37
+```
+
+### Phase 6: Correções da verificação (rodada 1)
+
+```
+T10 → T38
+T9 → T38
+T26 → T39
+T38 → T40
+T39 → T40
+T40 → T41
 ```
 
 ---
@@ -1108,6 +1119,110 @@ T36 → T37
 
 ---
 
+### T38: Conferência de números inteira e traços e setas ampliados
+
+**What**: Comparar números como token inteiro com sinal e unidade após NFKC, rejeitar dígitos fora de 0 a 9, procurar o destaque só nos campos desenhados, tratar caracteres de largura zero como vazio, ampliar traços e setas proibidos e tolerar BOM.
+**Where**: `src/validate.ts`
+**Depends on**: T10, T9
+**Reuses**: validador da trilha 1
+**Requirement**: VAL-07, VAL-08, VAL-12, VAL-15
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [x] `42%` não passa contra `142%`, `42` ou `42,5%`; `-3%` não passa contra `3%`; `5K` não passa contra `5 mil`
+- [x] Os 24 testes que reproduziam os achados do Verifier passam, e o destaque só no autor da citação reprova
+- [x] Gate check passes: `bunx tsc --noEmit && bun test`
+- [x] Observação: o commit reúne as mudanças de validate.ts e schema.ts (BOM) porque compartilham as mesmas funções e o mesmo arquivo de teste
+
+**Tests**: unit
+**Gate**: full
+
+**Commit**: `fix(validator): match numbers whole and reject more dashes and arrows`
+
+---
+
+### T39: Passos de render e pdf substituíveis nos testes
+
+**What**: Aceitar um terceiro argumento opcional com renderDeck e buildPdf em runRender.
+**Where**: `src/cli.ts`
+**Depends on**: T26
+**Reuses**: runRender
+**Requirement**: RND-08
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [x] Os caminhos de falha do pdf e do render ficam testáveis sem mockar módulos
+- [x] Gate check passes: `bunx tsc --noEmit && bun test`
+
+**Tests**: integration
+**Gate**: full
+
+**Commit**: `refactor(cli): let tests replace the render and pdf steps`
+
+---
+
+### T40: Fechar os testes que não discriminavam
+
+**What**: Cobrir os mutantes sobreviventes: número em handle e author, unidade %, quebra de linha do gancho, estouro do gancho, campo do destaque, passo pdf, rodapé no PDF e guarda estática ampliada.
+**Where**: `tests/validate-hardening.test.ts`
+**Depends on**: T38, T39
+**Reuses**: testes existentes
+**Requirement**: VAL-12, RND-04, RND-08
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [x] Oito mutantes que sobreviveram agora morrem (conferido numa cópia isolada)
+- [x] 366 testes passando
+- [x] Gate check passes: `bunx tsc --noEmit && bun test`
+
+**Tests**: unit
+**Gate**: full
+
+**Commit**: `test: close the gaps found by the independent verification`
+
+---
+
+### T41: Documentação e especificação alinhadas
+
+**What**: Corrigir a frase sobre CI de terceiros, documentar as regras novas e as limitações, e dar precisão aos ACs VAL-07, VAL-08 e VAL-12.
+**Where**: `README.md`
+**Depends on**: T40
+**Reuses**: README e SKILL.md
+**Requirement**: DOC-04, DOC-05
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [x] Nenhuma afirmação sobre terceiros além dos fatos verificados
+- [x] Limitações novas documentadas nos dois READMEs e no SKILL.md
+- [x] Gate check passes: `bunx tsc --noEmit && bun test`
+
+**Tests**: none
+**Gate**: build
+
+**Commit**: `docs: document the stricter validator rules and their limits`
+
+---
+
 ## Phase Execution Map
 
 ```
@@ -1118,6 +1233,7 @@ Phase 2:  T6 → T7 → T8 → T9 → T10 → T11 → T12
 Phase 3:  T13 → T14 → T15 → ... → T27
 Phase 4:  T28 → T29 → T30 → T31 → T32
 Phase 5:  T33 → T34 → T35 → T36 → T37
+Phase 6:  T38, T39 → T40 → T41
 ```
 
 Depois da T37 roda o Verifier, com um agente novo que não escreveu o código.
