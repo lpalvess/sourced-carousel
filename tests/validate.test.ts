@@ -340,3 +340,67 @@ describe("source-too-long (VAL-11)", () => {
     expect(byRule(validate(mid(text({ source: 5 }))), "schema-invalid")).toHaveLength(1);
   });
 });
+
+describe("forbidden-char (VAL-08)", () => {
+  const cases: [string, string][] = [
+    ["em dash U+2014", "\u2014"],
+    ["en dash U+2013", "\u2013"],
+    ["right arrow U+2192", "\u2192"],
+    ["double arrow U+21D2", "\u21D2"],
+    ["ascii arrow", "-" + ">"],
+  ];
+  for (const [name, ch] of cases) {
+    test(`${name} is rejected in a text slide and named in the message`, () => {
+      const f = byRule(validate(mid(text({ text: `before ${ch} after` }))), "forbidden-char");
+      expect(f).toHaveLength(1);
+      expect(f[0]).toMatchObject({ severity: "error", slide: 2 });
+      expect(f[0]?.message).toContain(ch);
+    });
+
+    test(`${name} is rejected in every text bearing field`, () => {
+      const t = `x ${ch} y`;
+      const slides: S[] = [
+        hook({ text: t }),
+        text({ title: t }),
+        num({ value: "v", label: t }),
+        num({ value: t }),
+        list({ items: ["ok", t] }),
+        list({ title: t }),
+        quote({ author: t }),
+        quote({ text: t }),
+        cta({ handle: t }),
+        cta({ text: t }),
+        text({ source: t }),
+      ];
+      for (const s of slides) {
+        expect(byRule(validate(mid(s)), "forbidden-char")).toHaveLength(1);
+      }
+    });
+  }
+
+  test("a plain hyphen does not fail", () => {
+    expect(byRule(validate(mid(text({ text: "well-known fact - really", source: "a-b" }))), "forbidden-char")).toHaveLength(0);
+  });
+
+  test("a greater-than sign or a lone minus alone is fine", () => {
+    expect(byRule(validate(mid(text({ text: "a > b and c - d" }))), "forbidden-char")).toHaveLength(0);
+  });
+
+  test("one finding per character per slide, even if repeated", () => {
+    const t = "\u2014 and \u2014 and \u2014";
+    expect(byRule(validate(mid(text({ text: t, title: t }))), "forbidden-char")).toHaveLength(1);
+  });
+
+  test("two different characters on a slide give two findings", () => {
+    expect(byRule(validate(mid(text({ text: "a \u2014 b \u2192 c" }))), "forbidden-char")).toHaveLength(2);
+  });
+
+  test("the same character on two slides gives two findings", () => {
+    const f = byRule(validate(deck([hook({ text: "a \u2014 b" }), text({ text: "c \u2014 d" }), cta()])), "forbidden-char");
+    expect(f.map((x) => x.slide)).toEqual([1, 2]);
+  });
+
+  test("a slide with an unknown type is still scanned", () => {
+    expect(byRule(validate(mid({ type: "video", text: "a \u2014 b" })), "forbidden-char")).toHaveLength(1);
+  });
+});

@@ -129,6 +129,38 @@ function checkContent(n: number, slide: Record<string, unknown>, type: string): 
   return out;
 }
 
+/** Characters and sequences that must never appear, written as escapes. */
+export const FORBIDDEN: readonly string[] = ["\u2014", "\u2013", "\u2192", "\u21D2", "\u002D\u003E"];
+
+/** Every visible string of a slide, including list items and source. */
+function allTexts(slide: Record<string, unknown>): string[] {
+  const out: string[] = [];
+  for (const key of ["text", "title", "value", "label", "author", "handle", "highlight", "source"]) {
+    const v = ownProp(slide, key);
+    if (typeof v === "string") out.push(v);
+  }
+  const items = ownProp(slide, "items");
+  if (Array.isArray(items)) for (const it of items) if (typeof it === "string") out.push(it);
+  return out;
+}
+
+function describeForbidden(seq: string): string {
+  if (seq.length === 2) return `"${seq}"`;
+  const cp = (seq.codePointAt(0) ?? 0).toString(16).toUpperCase().padStart(4, "0");
+  return `"${seq}" (U+${cp})`;
+}
+
+function checkForbidden(n: number, slide: Record<string, unknown>): Finding[] {
+  const texts = allTexts(slide);
+  const out: Finding[] = [];
+  for (const seq of FORBIDDEN) {
+    if (texts.some((t) => t.includes(seq))) {
+      out.push(err(n, "forbidden-char", `slide ${n} contains the forbidden character ${describeForbidden(seq)}`));
+    }
+  }
+  return out;
+}
+
 /** Runs every rule over a parsed deck. Findings come back ordered by slide. */
 export function validate(deck: RawDeck, opts?: { facts?: string }): Finding[] {
   void opts;
@@ -154,11 +186,13 @@ export function validate(deck: RawDeck, opts?: { facts?: string }): Finding[] {
       types.push(undefined);
       const shown = typeof type === "string" ? `"${type}"` : "missing";
       findings.push(err(n, "type-unknown", `slide ${n} has type ${shown}, expected one of ${SLIDE_TYPES.join(", ")}`));
+      findings.push(...checkForbidden(n, raw));
       return;
     }
     types.push(type);
     findings.push(...checkRequired(n, raw, type));
     findings.push(...checkContent(n, raw, type));
+    findings.push(...checkForbidden(n, raw));
   });
 
   if (count > 0) {
