@@ -161,9 +161,25 @@ function checkForbidden(n: number, slide: Record<string, unknown>): Finding[] {
   return out;
 }
 
+/** Numbers with optional separators and a unit, as written in the slide. */
+const NUMBER_RE = /\d+(?:[.,]\d+)*(?:\s?(?:%|x|\u00D7|k|M))?/g;
+
+/** Distinct numbers in the checked text of a slide. source and highlight are left out. */
+function numbersIn(slide: Record<string, unknown>): string[] {
+  const texts: string[] = [];
+  for (const key of ["text", "title", "value", "label", "author", "handle"]) {
+    const v = ownProp(slide, key);
+    if (typeof v === "string") texts.push(v);
+  }
+  const items = ownProp(slide, "items");
+  if (Array.isArray(items)) for (const it of items) if (typeof it === "string") texts.push(it);
+  const found = new Set<string>();
+  for (const t of texts) for (const m of t.matchAll(NUMBER_RE)) found.add(m[0]);
+  return [...found];
+}
+
 /** Runs every rule over a parsed deck. Findings come back ordered by slide. */
 export function validate(deck: RawDeck, opts?: { facts?: string }): Finding[] {
-  void opts;
   const findings: Finding[] = [];
   findings.push(...checkMeta(deck.meta));
 
@@ -203,6 +219,29 @@ export function validate(deck: RawDeck, opts?: { facts?: string }): Finding[] {
       findings.push(warn(count, "structure", "the last slide should be a cta"));
     }
   }
+
+  const facts = opts?.facts;
+  let skippedReported = false;
+  deck.slides.forEach((raw, i) => {
+    const n = i + 1;
+    if (!isRecord(raw)) return;
+    const type = ownProp(raw, "type");
+    if (typeof type !== "string" || !(SLIDE_TYPES as readonly string[]).includes(type)) return;
+    const numbers = numbersIn(raw);
+    if (numbers.length === 0) return;
+    if (facts === undefined) {
+      if (!skippedReported) {
+        skippedReported = true;
+        findings.push(warn(n, "facts-skipped", "numbers were not checked because no facts file was given"));
+      }
+      return;
+    }
+    for (const num of numbers) {
+      if (!facts.includes(num)) {
+        findings.push(err(n, "number-not-in-facts", `slide ${n} has the number "${num}" which is not in the facts file`));
+      }
+    }
+  });
 
   return findings.sort((a, b) => a.slide - b.slide);
 }

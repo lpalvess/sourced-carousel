@@ -404,3 +404,112 @@ describe("forbidden-char (VAL-08)", () => {
     expect(byRule(validate(mid({ type: "video", text: "a \u2014 b" })), "forbidden-char")).toHaveLength(1);
   });
 });
+
+describe("number-not-in-facts (VAL-12)", () => {
+  const nums = (slides: S[], facts: string) => byRule(validate(deck(slides), { facts }), "number-not-in-facts");
+
+  test("a number present in the facts passes", () => {
+    expect(nums([hook(), text({ text: "Grew 30 percent in 2025" }), cta()], "growth 30 percent in 2025")).toHaveLength(0);
+  });
+
+  test("a number missing from the facts fails with the number in the message", () => {
+    const f = nums([hook(), text({ text: "Grew by 47 users" }), cta()], "nothing relevant here");
+    expect(f).toHaveLength(1);
+    expect(f[0]).toMatchObject({ severity: "error", slide: 2 });
+    expect(f[0]?.message).toContain("47");
+  });
+
+  test("numbers with a unit are matched with the unit", () => {
+    expect(nums([hook(), num({ value: "30%", label: "up" }), cta()], "it rose 30% overall")).toHaveLength(0);
+    expect(nums([hook(), num({ value: "200x", label: "up" }), cta()], "it rose 200 times")).toHaveLength(1);
+    expect(nums([hook(), num({ value: "5\u00D7", label: "up" }), cta()], "5\u00D7 gain")).toHaveLength(0);
+  });
+
+  test("numbers are found in every text field, including list items", () => {
+    const facts = "none";
+    expect(nums([hook({ text: "Top 3 reasons" }), text(), cta()], facts)).toHaveLength(1);
+    expect(nums([hook(), text({ title: "In 2024" }), cta()], facts)).toHaveLength(1);
+    expect(nums([hook(), num({ value: "9", label: "x" }), cta()], facts)).toHaveLength(1);
+    expect(nums([hook(), list({ items: ["fine", "cost 12"] }), cta()], facts)).toHaveLength(1);
+    expect(nums([hook(), quote({ text: "I said 8" }), cta()], facts)).toHaveLength(1);
+  });
+
+  test("separators are compared exactly as written: 2.500 is not 2,5", () => {
+    expect(nums([hook(), text({ text: "Cost 2.500" }), cta()], "cost 2,5 thousand")).toHaveLength(1);
+    expect(nums([hook(), text({ text: "Cost 2,5" }), cta()], "cost 2.500")).toHaveLength(1);
+    expect(nums([hook(), text({ text: "Cost 2.500" }), cta()], "cost 2.500")).toHaveLength(0);
+    expect(nums([hook(), text({ text: "Cost 2,5" }), cta()], "cost 2,5")).toHaveLength(0);
+  });
+
+  test("the match is a plain substring, so the number may sit inside a longer token", () => {
+    expect(nums([hook(), text({ text: "Only 25" }), cta()], "row 2500 of the table")).toHaveLength(0);
+  });
+
+  test("the source field is outside the number check", () => {
+    expect(nums([hook(), text({ source: "Report 2025, page 14" }), cta()], "")).toHaveLength(0);
+  });
+
+  test("an empty facts file fails every number", () => {
+    const f = nums([hook({ text: "3 ways" }), text({ text: "Got 10 and 20" }), cta()], "");
+    expect(f.map((x) => [x.slide, x.message.includes("10") || x.message.includes("20") || x.message.includes("3")])).toEqual([
+      [1, true],
+      [2, true],
+      [2, true],
+    ]);
+  });
+
+  test("the same number on two slides gives two findings", () => {
+    const f = nums([hook({ text: "7 tips" }), text({ text: "tip 7" }), cta()], "unrelated");
+    expect(f.map((x) => x.slide)).toEqual([1, 2]);
+  });
+
+  test("a clean deck with facts yields no findings at all", () => {
+    expect(validate(deck(base()), { facts: "" })).toEqual([]);
+  });
+
+  test("with facts given there is no facts-skipped warning", () => {
+    expect(byRule(validate(deck([hook({ text: "3 ways" }), text(), cta()]), { facts: "3" }), "facts-skipped")).toHaveLength(0);
+  });
+});
+
+describe("facts-skipped (VAL-13)", () => {
+  test("without facts, a number gives one warning on the first slide with a number", () => {
+    const f = byRule(validate(deck([hook(), text({ text: "Got 10" }), text({ text: "Got 20" }), cta()])), "facts-skipped");
+    expect(f).toHaveLength(1);
+    expect(f[0]).toMatchObject({ severity: "warning", slide: 2 });
+  });
+
+  test("without facts there is no number-not-in-facts and no error", () => {
+    const f = validate(deck([hook({ text: "3 ways" }), text({ text: "Got 10" }), cta()]));
+    expect(byRule(f, "number-not-in-facts")).toHaveLength(0);
+    expect(errors(f)).toHaveLength(0);
+  });
+
+  test("without facts and without numbers there is no warning", () => {
+    expect(byRule(validate(deck(base())), "facts-skipped")).toHaveLength(0);
+  });
+
+  test("a number only in source does not trigger the warning", () => {
+    expect(byRule(validate(deck([hook(), text({ source: "Report 2025" }), cta()])), "facts-skipped")).toHaveLength(0);
+  });
+
+  test("parseAndValidate without facts still returns the deck", () => {
+    const r = parseAndValidate(JSON.stringify(deck([hook({ text: "3 ways" }), text(), cta()])));
+    expect(rules(r.findings)).toEqual(["facts-skipped"]);
+    expect(r.deck).toBeDefined();
+  });
+
+  test("parseAndValidate with an empty facts string rejects numbers and withholds the deck", () => {
+    const r = parseAndValidate(JSON.stringify(deck([hook({ text: "3 ways" }), text(), cta()])), "");
+    expect(rules(r.findings)).toEqual(["number-not-in-facts"]);
+    expect(r.deck).toBeUndefined();
+  });
+});
+
+describe("Independent Test from the spec", () => {
+  test("a dash, an arrow and a number absent from the facts give three errors", () => {
+    const slides = [hook(), text({ text: "wait \u2014 here" }), text({ text: "then " + "-" + "> there" }), text({ text: "only 99" }), cta()];
+    const f = errors(validate(deck(slides), { facts: "something else" }));
+    expect(rules(f).sort()).toEqual(["forbidden-char", "forbidden-char", "number-not-in-facts"]);
+  });
+});
