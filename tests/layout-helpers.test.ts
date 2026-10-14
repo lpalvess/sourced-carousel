@@ -48,3 +48,27 @@ describe("test helpers", () => {
     expect(collectNodes(tree).map((n) => n.type)).toEqual(["div", "span"]);
   });
 });
+
+/** Checks every layout must satisfy for its root node. */
+export function assertRoot(node: SatoriNode, ctx: LayoutContext): void {
+  expect(node.type).toBe("div");
+  const s = node.props.style ?? {};
+  expect(s.width).toBe(ctx.width);
+  expect(s.height).toBe(ctx.height);
+  expect(s.display).toBe("flex");
+  expect(s.backgroundColor).toBe(ctx.tokens.background);
+  expect(s.padding).toBe(ctx.tokens.padding);
+  expect(s.fontFamily).toBe("Inter");
+}
+
+/** Nodes of type span (the only element a layout may create from highlight logic). */
+export function spans(node: SatoriNode): SatoriNode[] {
+  return collectNodes(node).filter((n) => n.type === "span");
+}
+
+/** The node that directly holds `text` as one of its string children. */
+export function holderOf(root: SatoriNode, text: string): SatoriNode {
+  const found = collectNodes(root).find((n) => children(n).includes(text));
+  if (!found) throw new Error(`no node holds ${JSON.stringify(text)}`);
+  return found;
+}
