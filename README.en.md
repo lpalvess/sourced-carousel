@@ -15,7 +15,7 @@ It also rejects em dashes, en dashes and arrows in the text, and limits how much
 Docker is required. Nothing is installed on your system: everything runs in a container.
 
 ```
-git clone <repository-url> sourced-carousel
+git clone https://github.com/lpalvess/sourced-carousel.git
 cd sourced-carousel
 scripts/carousel.sh setup      # installs dependencies in the container; the only step with network
 scripts/carousel.sh selftest   # proves the container has no network and cannot write outside out

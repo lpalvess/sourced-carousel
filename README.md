@@ -15,7 +15,7 @@ Também reprova travessão, meia-risca e seta nos textos, e limita o tamanho do 
 Precisa de Docker. Nada é instalado no seu sistema: tudo roda em container.
 
 ```
-git clone <url-do-repositório> sourced-carousel
+git clone https://github.com/lpalvess/sourced-carousel.git
 cd sourced-carousel
 scripts/carousel.sh setup      # instala as dependências no container; único passo com rede
 scripts/carousel.sh selftest   # prova que o container não tem rede e não escreve fora de out
