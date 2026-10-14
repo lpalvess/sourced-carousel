@@ -201,3 +201,24 @@ describe("RND-10 progress", () => {
     expect(calls).toEqual([[1, 6], [2, 6], [3, 6], [4, 6], [5, 6], [6, 6]]);
   });
 });
+
+describe("hook text is fitted and keeps its line breaks", () => {
+  test("a hook that cannot fit fails with text-overflow naming slide 1", async () => {
+    const slides: Slide[] = [{ type: "hook", text: "a".repeat(200) }, FULL[2] as Slide, FULL[5] as Slide];
+    let error: unknown;
+    try {
+      await renderDeck(deckOf(slides));
+    } catch (err) {
+      error = err;
+    }
+    expect(error instanceof TextOverflowError).toBe(true);
+    expect((error as Error).message).toContain("slide 1");
+  });
+
+  test("a line break in the hook changes the picture (it is kept, not collapsed)", async () => {
+    const rest = FULL.slice(1, 3);
+    const broken = await renderDeck(deckOf([{ type: "hook", text: "AAA\nBBB" }, ...rest]));
+    const flat = await renderDeck(deckOf([{ type: "hook", text: "AAA BBB" }, ...rest]));
+    expect(Buffer.from((broken[0] as RenderedSlide).png).equals(Buffer.from((flat[0] as RenderedSlide).png))).toBe(false);
+  });
+});

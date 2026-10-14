@@ -34,6 +34,16 @@ const RULES: Rule[] = [
   { name: "node:dns", pattern: new RegExp(j("node:", "dns\\b")), sample: j("import 'node:", "dns'") },
   { name: "process env", pattern: new RegExp(j("\\bproc", "ess\\.env\\b")), sample: j("const v = proc", "ess.env.HOME") },
   { name: "Bun env", pattern: new RegExp(j("\\bBu", "n\\.env\\b")), sample: j("const v = Bu", "n.env.HOME") },
+  { name: "Bun spawn", pattern: new RegExp(j("\\bBun\\.sp", "awn")), sample: j("Bun.sp", "awn(['ls'])") },
+  { name: "Bun connect", pattern: new RegExp(j("\\bBun\\.con", "nect")), sample: j("await Bun.con", "nect({})") },
+  { name: "Bun listen", pattern: new RegExp(j("\\bBun\\.lis", "ten")), sample: j("Bun.lis", "ten({})") },
+  { name: "Bun serve", pattern: new RegExp(j("\\bBun\\.ser", "ve")), sample: j("Bun.ser", "ve({})") },
+  { name: "node:tls", pattern: new RegExp(j("node:t", "ls\\b")), sample: j("import 'node:t", "ls'") },
+  { name: "node:http2", pattern: new RegExp(j("node:ht", "tp2\\b")), sample: j("import 'node:ht", "tp2'") },
+  { name: "node:vm", pattern: new RegExp(j("node:", "vm\\b")), sample: j("import 'node:", "vm'") },
+  { name: "worker threads", pattern: new RegExp(j("worker", "_threads")), sample: j("import 'node:worker", "_threads'") },
+  { name: "Function call without new", pattern: new RegExp(j("(?<![\\w.])Func", "tion\\s*\\(")), sample: j("Func", "tion('return 1')()") },
+  { name: "globalThis indexing", pattern: new RegExp(j("global", "This\\s*\\[")), sample: j("global", "This['x']") },
 ];
 
 async function listTs(dir: string): Promise<string[]> {

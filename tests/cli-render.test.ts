@@ -153,3 +153,48 @@ describe("edge cases", () => {
     expect((r.lines[0] as string).includes(missing)).toBe(true);
   });
 });
+
+describe("RND-04 the source footer is in the PDF too", () => {
+  test("the PDF changes when a slide gets a source", async () => {
+    const withSource = JSON.stringify({
+      slides: GOOD_DECK.slides.map((x, i) => (i === 0 ? { ...x, source: "Fonte: exemplo" } : x)),
+    });
+    const without = JSON.stringify(GOOD_DECK);
+    const dir = await workdir();
+    const a = join(dir, "a");
+    const b = join(dir, "b");
+    expect((await runRender([await write(dir, "with.json", withSource), "--out", a])).code).toBe(0);
+    expect((await runRender([await write(dir, "without.json", without), "--out", b])).code).toBe(0);
+    const pdfA = await readFile(join(a, "carousel.pdf"));
+    const pdfB = await readFile(join(b, "carousel.pdf"));
+    expect(pdfA.equals(pdfB)).toBe(false);
+  });
+});
+
+describe("RND-08 injected step failures", () => {
+  test("a failing pdf step exits 3, names the step and writes nothing", async () => {
+    const dir = await workdir();
+    const slides = await write(dir, "slides.json", JSON.stringify(GOOD_DECK));
+    const out = join(dir, "out");
+    const r = await runRender([slides, "--out", out], undefined, {
+      buildPdf: () => {
+        throw new Error("boom");
+      },
+    });
+    expect(r.code).toBe(3);
+    expect(r.lines[r.lines.length - 1]).toBe("error: pdf failed: boom");
+    await expect(readdir(out)).rejects.toThrow();
+  });
+
+  test("a failing render step exits 3 and names the step", async () => {
+    const dir = await workdir();
+    const slides = await write(dir, "slides.json", JSON.stringify(GOOD_DECK));
+    const r = await runRender([slides, "--out", join(dir, "out")], undefined, {
+      renderDeck: async () => {
+        throw new Error("kaput");
+      },
+    });
+    expect(r.code).toBe(3);
+    expect(r.lines[r.lines.length - 1]).toBe("error: render failed: kaput");
+  });
+});
