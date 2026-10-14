@@ -79,6 +79,12 @@ export async function runValidate(args: string[]): Promise<{ code: number; lines
   return { code: failed ? 1 : 0, lines: findings.map(formatFinding) };
 }
 
+/** The two steps that can fail at run time. Tests replace them to prove the failure paths. */
+export interface RenderDeps {
+  renderDeck: typeof renderDeck;
+  buildPdf: typeof buildPdf;
+}
+
 /** The step a render failure happened in, named in the error line. */
 type Step = "render" | "pdf" | "write";
 
@@ -98,7 +104,10 @@ function failure(step: Step, err: unknown): string {
 export async function runRender(
   args: string[],
   onLine?: (line: string) => void,
+  deps: Partial<RenderDeps> = {},
 ): Promise<{ code: number; lines: string[] }> {
+  const render = deps.renderDeck ?? renderDeck;
+  const makePdf = deps.buildPdf ?? buildPdf;
   const lines: string[] = [];
   const emit = (line: string) => {
     lines.push(line);
@@ -140,7 +149,7 @@ export async function runRender(
 
   let rendered;
   try {
-    rendered = await renderDeck(deck, (i, n) => emit(`slide ${i}/${n}`));
+    rendered = await render(deck, (i, n) => emit(`slide ${i}/${n}`));
   } catch (err) {
     emit(failure("render", err));
     return done(3);
@@ -148,7 +157,7 @@ export async function runRender(
 
   let pdf: Uint8Array;
   try {
-    pdf = buildPdf(rendered.map((s) => ({ width: s.width, height: s.height, rgba: s.rgba })));
+    pdf = makePdf(rendered.map((s) => ({ width: s.width, height: s.height, rgba: s.rgba })));
   } catch (err) {
     emit(failure("pdf", err));
     return done(3);
