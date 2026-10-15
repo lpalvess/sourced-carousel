@@ -196,6 +196,7 @@ Outros projetos que também geram carrosséis e podem servir melhor ao seu caso:
 ## Licença e créditos
 
 - Código sob licença MIT, veja [LICENSE](LICENSE).
+- Política de privacidade: [PRIVACY.md](PRIVACY.md).
 - Fonte Inter, licença OFL, veja [THIRD_PARTY_FONTS.md](THIRD_PARTY_FONTS.md).
 - Diagramas feitos com [Excalidraw](https://excalidraw.com) e com a skill [drawio-skills](https://github.com/bahayonghang/drawio-skills) (MIT).
 - Satori e resvg-wasm são MPL-2.0 e usados sem modificação. Veja [docs/dependencies.md](docs/dependencies.md).

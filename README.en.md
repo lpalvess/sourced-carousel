@@ -196,6 +196,7 @@ Other projects that also generate carousels and may fit your case better:
 ## License and credits
 
 - Code under the MIT license, see [LICENSE](LICENSE).
+- Privacy policy: [PRIVACY.md](PRIVACY.md).
 - Inter font, OFL license, see [THIRD_PARTY_FONTS.md](THIRD_PARTY_FONTS.md).
 - Diagrams made with [Excalidraw](https://excalidraw.com) and the [drawio-skills](https://github.com/bahayonghang/drawio-skills) skill (MIT).
 - Satori and resvg-wasm are MPL-2.0 and used without modification. See [docs/dependencies.md](docs/dependencies.md).
