@@ -53,6 +53,12 @@ Duas coisas para saber antes de instalar como plugin:
 - Ao instalar, o próprio Claude Code instala as dependências do `bun.lock` na pasta do plugin, se você tiver o Bun no PATH. Segundo a documentação do Claude Code, essa instalação não roda nenhum script dos pacotes e usa só as versões fixadas no lockfile. O código do projeto continua rodando só no container.
 - A skill só funciona no Claude Code, porque precisa de Docker e de um script bash. No chat do claude.ai ela não roda.
 
+### Exemplos de pedidos
+
+- "Faça um carrossel deste post usando os fatos de fatos.md." A skill propõe o plano, espera sua aprovação, valida e gera o PDF em `out/`.
+- "Valide este slides.json contra fatos.md e me diga o que corrigir." A skill roda só o `validate` e explica cada erro, sem gerar nada.
+- "Gere o carrossel no formato retrato e com tema claro." A skill usa `linkedin-portrait` (1080x1350) e o tema `light`.
+
 Se você clonou o repositório, também dá para carregar o plugin só numa sessão: `claude --plugin-dir /caminho/para/sourced-carousel`.
 
 ## Exemplo completo
@@ -145,6 +151,21 @@ Cada achado sai como `<severity> slide <N> <rule-id>: <mensagem>`.
 | 2 | Argumentos errados, arquivo ilegível ou dependências não instaladas. |
 | 3 | Falha ao gerar (render, pdf ou escrita). Nenhum `carousel.pdf` fica no disco. |
 | 4 | O container não pôde ser iniciado (por exemplo, Docker ausente). |
+
+## Problemas comuns
+
+| Sintoma | O que fazer |
+| ------- | ----------- |
+| Sai com código 4 ou "docker is required" | Instale o Docker e confira se ele está rodando (`docker info`). |
+| Sai com código 2 e "dependencies are not installed" | Rode o `setup` uma vez (é o único passo com rede). Depois de atualizar o plugin, rode de novo. |
+| Sai com código 1 | Leia cada linha `error slide N regra: mensagem`, corrija o `slides.json` ou o arquivo de fatos e valide de novo. A tabela de regras acima explica cada uma. |
+| Sai com código 3 | A geração falhou e nenhum PDF ficou no disco. Confira se a pasta de saída pode ser gravada e rode de novo. |
+| Erro `too-many-words`, `hook-too-long` ou `text-overflow` | Encurte o texto do slide. O validador reprova texto acima do limite de palavras ou de linhas, e o render falha com `text-overflow` quando o texto não cabe. |
+
+## Suporte
+
+- Dúvidas e problemas: abra uma issue em https://github.com/lpalvess/sourced-carousel/issues.
+- Falhas de segurança: use o relato privado de vulnerabilidades, como explica o [SECURITY.md](SECURITY.md).
 
 ## Segurança
 

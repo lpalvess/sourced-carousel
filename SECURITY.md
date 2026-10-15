@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-There are no releases yet. Only the latest commit on `main` is supported.
+The current version is 1.0.0. Only the latest commit on `main` is supported.
 
 ## Reporting a vulnerability
 

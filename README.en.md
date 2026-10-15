@@ -53,6 +53,12 @@ Two things to know before you install it as a plugin:
 - On install, Claude Code itself installs the dependencies from `bun.lock` into the plugin folder, if Bun is on your PATH. According to the Claude Code documentation, this install runs no package scripts and uses only the versions pinned in the lockfile. The project's code still runs only in the container.
 - The skill only works in Claude Code, because it needs Docker and a bash script. It does not run in claude.ai chat.
 
+### Example prompts
+
+- "Make a carousel from this post using the facts in facts.md." The skill proposes a plan, waits for your approval, validates and writes the PDF to `out/`.
+- "Validate this slides.json against facts.md and tell me what to fix." The skill runs only `validate` and explains each error, without generating anything.
+- "Generate the carousel in portrait format with the light theme." The skill uses `linkedin-portrait` (1080x1350) and the `light` theme.
+
 If you cloned the repository, you can also load the plugin for one session: `claude --plugin-dir /path/to/sourced-carousel`.
 
 ## Full example
@@ -145,6 +151,21 @@ Each finding is printed as `<severity> slide <N> <rule-id>: <message>`.
 | 2 | Wrong arguments, unreadable file, or dependencies not installed. |
 | 3 | Render failure (render, pdf or write step). No `carousel.pdf` is left on disk. |
 | 4 | The container could not be started (for example, Docker is missing). |
+
+## Troubleshooting
+
+| Symptom | What to do |
+| ------- | ---------- |
+| Exits with code 4 or "docker is required" | Install Docker and check that it is running (`docker info`). |
+| Exits with code 2 and "dependencies are not installed" | Run `setup` once (it is the only step with network). Run it again after you update the plugin. |
+| Exits with code 1 | Read each `error slide N rule: message` line, fix `slides.json` or the facts file and validate again. The rules table above explains each rule. |
+| Exits with code 3 | Rendering failed and no PDF was left on disk. Check that the output folder is writable and run it again. |
+| Error `too-many-words`, `hook-too-long` or `text-overflow` | Shorten the slide text. The validator rejects text over the word or line limit, and render fails with `text-overflow` when the text does not fit. |
+
+## Support
+
+- Questions and problems: open an issue at https://github.com/lpalvess/sourced-carousel/issues.
+- Security problems: use private vulnerability reporting, as [SECURITY.md](SECURITY.md) explains.
 
 ## Security
 
