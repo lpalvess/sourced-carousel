@@ -155,13 +155,13 @@ Para reportar uma vulnerabilidade, veja [SECURITY.md](SECURITY.md).
 - Não tem editor visual.
 - Não gera imagens com IA e não coloca imagens nos slides.
 
-## Comparação
+## Projetos parecidos
 
-Fatos verificados em 2026-10-14. Podem ter mudado depois dessa data. Não dizemos nada sobre qualidade, popularidade ou segurança desses projetos.
+Outros projetos que também geram carrosséis e podem servir melhor ao seu caso:
 
-- [ContentHub](https://github.com/thallisribeiro/contenthub): tem um gate factual no fluxo e o carrossel dele é para Instagram. Não encontramos uma pasta `.github` no repositório (isso não diz nada sobre outros jeitos de ter CI).
-- [threads-carousel-claude-skill](https://github.com/itchernetski/threads-carousel-claude-skill) (licença MIT, no arquivo LICENSE): gera carrossel com prévia em navegador (Next.js) e a exportação é feita no navegador. Este projeto nasceu de uma auditoria de segurança dele.
-- [Slashgear/linkedin-carousel-gen](https://github.com/Slashgear/linkedin-carousel-gen): MIT, usa Satori e Bun para gerar PDFs de carrossel do LinkedIn.
+- [ContentHub](https://github.com/thallisribeiro/contenthub): gera conteúdo e carrosséis para Instagram.
+- [threads-carousel-claude-skill](https://github.com/itchernetski/threads-carousel-claude-skill): skill do Claude Code que transforma posts em carrosséis, com prévia no navegador. Foi a inspiração para este projeto.
+- [linkedin-carousel-gen](https://github.com/Slashgear/linkedin-carousel-gen): gera PDFs de carrossel do LinkedIn com Satori e Bun.
 
 ## Licença e créditos
 

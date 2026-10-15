@@ -155,13 +155,13 @@ To report a vulnerability, see [SECURITY.md](SECURITY.md).
 - It has no visual editor.
 - It does not generate images with AI and does not place images on slides.
 
-## Comparison
+## Similar projects
 
-Facts verified on 2026-10-14. They may have changed since. We say nothing about the quality, popularity or security of these projects.
+Other projects that also generate carousels and may fit your case better:
 
-- [ContentHub](https://github.com/thallisribeiro/contenthub): has a factual gate in its flow and its carousel is for Instagram. We did not find a `.github` folder in the repository (this says nothing about other ways of having CI).
-- [threads-carousel-claude-skill](https://github.com/itchernetski/threads-carousel-claude-skill) (MIT license, in the LICENSE file): generates a carousel with a browser preview (Next.js) and the export is done in the browser. This project started from a security audit of it.
-- [Slashgear/linkedin-carousel-gen](https://github.com/Slashgear/linkedin-carousel-gen): MIT, uses Satori and Bun to generate LinkedIn carousel PDFs.
+- [ContentHub](https://github.com/thallisribeiro/contenthub): generates content and carousels for Instagram.
+- [threads-carousel-claude-skill](https://github.com/itchernetski/threads-carousel-claude-skill): a Claude Code skill that turns posts into carousels, with a browser preview. It inspired this project.
+- [linkedin-carousel-gen](https://github.com/Slashgear/linkedin-carousel-gen): generates LinkedIn carousel PDFs with Satori and Bun.
 
 ## License and credits
 

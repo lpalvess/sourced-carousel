@@ -2,7 +2,7 @@
 
 ## Problem Statement
 
-Geradores de carrossel para LinkedIn transformam texto em slides, mas nenhum dos que avaliamos em 2026-10-14 prova que cada número do carrossel veio da fonte, e quase nenhum tem CI ou Dependabot. Skills de terceiros maliciosas são um risco documentado em 2026 (Snyk ToxicSkills, arXiv 2602.06547). O sourced-carousel gera o PDF do carrossel com número rastreável à fonte, rodapé de fonte por slide, sem navegador, sem rede e auditável.
+Geradores de carrossel para LinkedIn transformam texto em slides. Este projeto foca em um ponto específico: provar que cada número do carrossel veio da fonte. Skills de terceiros maliciosas são um risco documentado em 2026 (Snyk ToxicSkills, arXiv 2602.06547). O sourced-carousel gera o PDF do carrossel com número rastreável à fonte, rodapé de fonte por slide, sem navegador, sem rede e auditável.
 
 ## Goals
 
