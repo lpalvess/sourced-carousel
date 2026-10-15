@@ -33,14 +33,22 @@ scripts/carousel.sh selftest   # prova que o container não tem rede e não escr
 
 ### Usar como skill do Claude Code
 
-A skill roda os scripts do próprio repositório, então abra o Claude Code dentro da pasta clonada e instale o `SKILL.md` como skill do projeto:
+Instale como plugin, direto deste repositório. No terminal:
 
 ```
-mkdir -p .claude/skills/sourced-carousel
-cp SKILL.md .claude/skills/sourced-carousel/SKILL.md
+claude plugin marketplace add lpalvess/sourced-carousel
+claude plugin install sourced-carousel@sourced-carousel
 ```
 
-Depois peça, por exemplo: "faça um carrossel deste post usando os fatos de fatos.md". A skill propõe o plano dos slides, espera sua aprovação, valida, gera o PDF em `out/` e nunca publica nada.
+Ou, dentro de uma sessão do Claude Code (versão 2.1.275 ou mais nova):
+
+```
+/plugin install sourced-carousel --marketplace lpalvess/sourced-carousel
+```
+
+Na primeira vez, peça para a skill rodar o `setup`, que instala as dependências no container e é o único passo com rede. Depois peça, de qualquer pasta, por exemplo: "faça um carrossel deste post usando os fatos de fatos.md". A skill propõe o plano dos slides, espera sua aprovação, valida, gera o PDF em `out/` e nunca publica nada.
+
+Se você clonou o repositório, também dá para carregar o plugin só numa sessão: `claude --plugin-dir /caminho/para/sourced-carousel`.
 
 ## Exemplo completo
 

@@ -33,14 +33,22 @@ scripts/carousel.sh selftest   # proves the container has no network and cannot 
 
 ### Use it as a Claude Code skill
 
-The skill runs the repository's own scripts, so open Claude Code inside the cloned folder and install `SKILL.md` as a project skill:
+Install it as a plugin, straight from this repository. In your terminal:
 
 ```
-mkdir -p .claude/skills/sourced-carousel
-cp SKILL.md .claude/skills/sourced-carousel/SKILL.md
+claude plugin marketplace add lpalvess/sourced-carousel
+claude plugin install sourced-carousel@sourced-carousel
 ```
 
-Then ask, for example: "make a carousel from this post using the facts in facts.md". The skill proposes the slide plan, waits for your approval, validates, renders the PDF into `out/` and never publishes anything.
+Or, inside a Claude Code session (version 2.1.275 or later):
+
+```
+/plugin install sourced-carousel --marketplace lpalvess/sourced-carousel
+```
+
+The first time, ask the skill to run `setup`, which installs the dependencies in the container and is the only step with network. Then ask, from any folder, for example: "make a carousel from this post using the facts in facts.md". The skill proposes a slide plan, waits for your approval, validates, writes the PDF to `out/` and never publishes anything.
+
+If you cloned the repository, you can also load the plugin for one session: `claude --plugin-dir /path/to/sourced-carousel`.
 
 ## Full example
 

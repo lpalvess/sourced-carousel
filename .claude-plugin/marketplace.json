@@ -1,0 +1,15 @@
+{
+  "name": "sourced-carousel",
+  "description": "The sourced-carousel plugin for Claude Code",
+  "owner": {
+    "name": "Lucas Pinheiro Alves",
+    "url": "https://github.com/lpalvess"
+  },
+  "plugins": [
+    {
+      "name": "sourced-carousel",
+      "source": "./",
+      "description": "LinkedIn carousel PDFs where every number traces back to a facts file. Offline, no browser, auditable."
+    }
+  ]
+}

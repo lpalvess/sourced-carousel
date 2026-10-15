@@ -1,0 +1,12 @@
+{
+  "name": "sourced-carousel",
+  "description": "LinkedIn carousel PDFs where every number traces back to a facts file. Offline, no browser, auditable.",
+  "author": {
+    "name": "Lucas Pinheiro Alves",
+    "url": "https://github.com/lpalvess"
+  },
+  "homepage": "https://github.com/lpalvess/sourced-carousel",
+  "repository": "https://github.com/lpalvess/sourced-carousel",
+  "license": "MIT",
+  "skills": ["."]
+}
