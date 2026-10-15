@@ -71,6 +71,15 @@ Any text works. The recommended format is one line per fact, with number, contex
 
 The validator looks for each number from the slides as exact text inside this file.
 
+### How the source is checked
+
+The container has no network, so it never opens the source. Checking happens in two steps:
+
+1. **Before, outside the container.** You (or the agent, when you use the skill) read the original source and copy each number into the facts file with the literal quote and the link. The quote is copied word for word, never from memory.
+2. **Inside the container, with no network.** The validator compares every number on the slides with the facts file. If a number is not there, written the same way, the PDF is not generated.
+
+The network stays off for security: the code that reads your text and builds the PDF cannot send anything out or download anything. That is why the validator confirms that a number came from the facts file, but not that the quote is right in the source. That final check is yours, and the skill hands you the list of facts it used (number, quote and link) to make it easier.
+
 ## Slide types
 
 `slides.json` has an optional `meta` and `slides`, from 3 to 10. Every slide accepts `source` (footer, up to 80 characters) and `highlight` (1 or 2 words from the slide itself, drawn in the accent color).

@@ -71,6 +71,15 @@ Qualquer texto serve. O formato recomendado é uma linha por fato, com número, 
 
 O validador procura cada número do slide como texto exato dentro desse arquivo.
 
+### Como a fonte é conferida
+
+O container não tem rede, então ele nunca abre a fonte. A conferência acontece em duas etapas:
+
+1. **Antes, fora do container.** Você (ou o agente, quando usa a skill) lê a fonte original e copia para o arquivo de fatos cada número com o trecho literal e o link. O trecho é copiado palavra por palavra, nunca de memória.
+2. **Dentro do container, sem rede.** O validador compara cada número dos slides com o arquivo de fatos. Se um número não estiver lá, escrito do mesmo jeito, o PDF não é gerado.
+
+A rede fica desligada por segurança: o código que lê seus textos e gera o PDF não consegue enviar nada para fora nem baixar nada. Por isso o validador confirma que o número veio do arquivo de fatos, mas não que o trecho está certo na fonte. Essa conferência final é sua, e a skill entrega a lista de fatos usada (número, trecho e link) para facilitar.
+
 ## Tipos de slide
 
 O `slides.json` tem `meta` (opcional) e `slides`, de 3 a 10. Todo slide aceita `source` (rodapé, até 80 caracteres) e `highlight` (1 ou 2 palavras do próprio slide, na cor de destaque).
