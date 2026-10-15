@@ -12,6 +12,14 @@ A data carousel often has numbers that become "true" just because they sit in a 
 
 It also rejects em dashes, en dashes and arrows in the text, and limits how much text each slide can hold.
 
+## Architecture
+
+![Architecture: the source is read outside the container and becomes facts.md and slides.json; inside the container with no network, validate checks every number against the facts, render draws with Satori and resvg, pdf builds the carousel, and only the out/ folder is writable](docs/diagrams/architecture.en.png)
+
+The source is read outside the container. Inside it, with no network, `validate` checks the rules and every number against the facts. If everything passes, `render` draws the slides (Satori for SVG, resvg for PNG) and `pdf` builds the carousel in `out/`, the only writable folder. If any number is not in the facts, nothing is generated.
+
+The editable diagram files are in [docs/diagrams/](docs/diagrams/): `architecture.en.excalidraw` (opens at excalidraw.com) and `architecture.en.drawio` (opens in draw.io).
+
 ## Installation
 
 Docker is required. Nothing is installed on your system: everything runs in a container.
@@ -176,4 +184,5 @@ Other projects that also generate carousels and may fit your case better:
 
 - Code under the MIT license, see [LICENSE](LICENSE).
 - Inter font, OFL license, see [THIRD_PARTY_FONTS.md](THIRD_PARTY_FONTS.md).
+- Diagrams made with [Excalidraw](https://excalidraw.com) and the [drawio-skills](https://github.com/bahayonghang/drawio-skills) skill (MIT).
 - Satori and resvg-wasm are MPL-2.0 and used without modification. See [docs/dependencies.md](docs/dependencies.md).

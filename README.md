@@ -12,6 +12,14 @@ Um carrossel de dados costuma ter números que viram "verdade" só porque estão
 
 Também reprova travessão, meia-risca e seta nos textos, e limita o tamanho do texto de cada slide.
 
+## Arquitetura
+
+![Arquitetura: a fonte é lida fora do container e vira fatos.md e slides.json; dentro do container sem rede, validate confere cada número contra os fatos, render desenha com Satori e resvg, pdf monta o carrossel, e só a pasta out/ é gravável](docs/diagrams/architecture.pt.png)
+
+A fonte é lida fora do container. Dentro dele, sem rede, `validate` confere as regras e cada número contra os fatos. Se tudo passa, `render` desenha os slides (Satori para SVG, resvg para PNG) e `pdf` monta o carrossel em `out/`, a única pasta gravável. Se algum número não está nos fatos, nada é gerado.
+
+Os arquivos editáveis do diagrama ficam em [docs/diagrams/](docs/diagrams/): `architecture.pt.excalidraw` (abre em excalidraw.com) e `architecture.pt.drawio` (abre no draw.io).
+
 ## Instalação
 
 Precisa de Docker. Nada é instalado no seu sistema: tudo roda em container.
@@ -176,4 +184,5 @@ Outros projetos que também geram carrosséis e podem servir melhor ao seu caso:
 
 - Código sob licença MIT, veja [LICENSE](LICENSE).
 - Fonte Inter, licença OFL, veja [THIRD_PARTY_FONTS.md](THIRD_PARTY_FONTS.md).
+- Diagramas feitos com [Excalidraw](https://excalidraw.com) e com a skill [drawio-skills](https://github.com/bahayonghang/drawio-skills) (MIT).
 - Satori e resvg-wasm são MPL-2.0 e usados sem modificação. Veja [docs/dependencies.md](docs/dependencies.md).

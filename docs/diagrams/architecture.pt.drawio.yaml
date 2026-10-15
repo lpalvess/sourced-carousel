@@ -1,0 +1,81 @@
+meta:
+  title: "sourced-carousel"
+  theme: tech-blue
+  layout: hierarchical
+
+nodes:
+  - id: source
+    label: "Fonte original\n(artigo, relatório)"
+    type: document
+    module: outside
+  - id: author
+    label: "Você ou o agente\n(skill)"
+    type: user
+    module: outside
+  - id: facts
+    label: "fatos.md\nnúmero + trecho literal + link"
+    type: document
+    module: outside
+  - id: slides
+    label: "slides.json\ntexto dos slides"
+    type: document
+    module: outside
+  - id: validate
+    label: "validate\nregras + cada número\ncontra os fatos"
+    type: process
+    module: inside
+  - id: fail
+    label: "Número fora dos fatos:\nreprova, sem PDF"
+    type: terminal
+    module: inside
+  - id: render
+    label: "render\nSatori (SVG)\nresvg (PNG)"
+    type: process
+    module: inside
+  - id: pdf
+    label: "pdf\nmonta o carrossel"
+    type: process
+    module: inside
+  - id: out
+    label: "out/\nPNGs + carousel.pdf"
+    type: service
+    module: writable
+
+edges:
+  - from: source
+    to: author
+    type: primary
+  - from: author
+    to: facts
+    type: primary
+  - from: author
+    to: slides
+    type: primary
+  - from: facts
+    to: validate
+    type: primary
+  - from: slides
+    to: validate
+    type: primary
+  - from: validate
+    to: fail
+    type: data
+    label: "erro"
+  - from: validate
+    to: render
+    type: primary
+    label: "ok"
+  - from: render
+    to: pdf
+    type: primary
+  - from: pdf
+    to: out
+    type: primary
+
+modules:
+  - id: outside
+    label: "Fora do container (com rede)"
+  - id: inside
+    label: "Container sem rede (--network none, somente leitura)"
+  - id: writable
+    label: "Única pasta gravável"

@@ -1,0 +1,81 @@
+meta:
+  title: "sourced-carousel"
+  theme: tech-blue
+  layout: hierarchical
+
+nodes:
+  - id: source
+    label: "Original source\n(article, report)"
+    type: document
+    module: outside
+  - id: author
+    label: "You or the agent\n(skill)"
+    type: user
+    module: outside
+  - id: facts
+    label: "facts.md\nnumber + literal quote + link"
+    type: document
+    module: outside
+  - id: slides
+    label: "slides.json\nslide text"
+    type: document
+    module: outside
+  - id: validate
+    label: "validate\nrules + every number\nagainst the facts"
+    type: process
+    module: inside
+  - id: fail
+    label: "Number not in facts:\nrejected, no PDF"
+    type: terminal
+    module: inside
+  - id: render
+    label: "render\nSatori (SVG)\nresvg (PNG)"
+    type: process
+    module: inside
+  - id: pdf
+    label: "pdf\nbuilds the carousel"
+    type: process
+    module: inside
+  - id: out
+    label: "out/\nPNGs + carousel.pdf"
+    type: service
+    module: writable
+
+edges:
+  - from: source
+    to: author
+    type: primary
+  - from: author
+    to: facts
+    type: primary
+  - from: author
+    to: slides
+    type: primary
+  - from: facts
+    to: validate
+    type: primary
+  - from: slides
+    to: validate
+    type: primary
+  - from: validate
+    to: fail
+    type: data
+    label: "error"
+  - from: validate
+    to: render
+    type: primary
+    label: "ok"
+  - from: render
+    to: pdf
+    type: primary
+  - from: pdf
+    to: out
+    type: primary
+
+modules:
+  - id: outside
+    label: "Outside the container (with network)"
+  - id: inside
+    label: "Container with no network (--network none, read-only)"
+  - id: writable
+    label: "Only writable folder"
