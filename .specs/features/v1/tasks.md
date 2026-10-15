@@ -69,7 +69,7 @@ Gate da main (container, sem rede): typecheck ok e 309 testes passando. T24 acho
 
 > Generated from codebase - confirm before Execute.
 
-Todo comando roda no container: `docker run --rm --user $(id -u):$(id -g) -e HOME=/tmp -v "$PWD":/app -w /app oven/bun:1 <comando>`. A instalação (`bun install --frozen-lockfile --ignore-scripts`) é o único passo com rede.
+Todo comando roda no container: `docker run --rm --user $(id -u):$(id -g) -e HOME=/tmp -v /path/to/sourced-carousel:/app -w /app oven/bun:1 <comando>`. A instalação (`bun install --frozen-lockfile --ignore-scripts`) é o único passo com rede.
 
 | Gate Level | When to Use | Command |
 | ---------- | ----------- | ------- |

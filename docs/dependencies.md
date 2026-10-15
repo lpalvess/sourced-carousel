@@ -71,7 +71,7 @@ Licenses in the transitive table: MIT (24 entries) and ISC (`css-color-keywords`
 Command:
 
 ```
-docker run --rm -v "$PWD":/src:ro aquasec/trivy:latest fs --scanners vuln --severity HIGH,CRITICAL --quiet /src
+docker run --rm -v /path/to/sourced-carousel:/src:ro aquasec/trivy:latest fs --scanners vuln --severity HIGH,CRITICAL --quiet /src
 ```
 
 Result on 2026-10-14, Trivy 0.75.0 (`docker run --rm aquasec/trivy:latest --version`): target `bun.lock` (type `bun`), 0 vulnerabilities at HIGH or CRITICAL, exit code 0. The CI workflow (`.github/workflows/ci.yml`) runs the same scan on every pull request and push to main with `exit-code: "1"`, using the Trivy version that `aquasecurity/trivy-action` pins by default. It has not run on GitHub yet.
@@ -107,7 +107,7 @@ Dependabot is configured in `.github/dependabot.yml` (weekly, for `bun` and `git
 1. Read the diff of `package.json` and `bun.lock`. A new package in `bun.lock` is a new transitive dependency: treat it as new code.
 2. For every added or changed package run `npm view <pkg>@<new-version> license scripts repository.url --json` (read-only) and check that the license is still compatible with MIT and that no `preinstall`, `install` or `postinstall` appeared.
 3. Check the count of direct runtime dependencies stays at 4 or fewer.
-4. Install only in a throwaway container: `docker run --rm --user $(id -u):$(id -g) -e HOME=/tmp -v "$PWD":/app -w /app oven/bun:1 bun install --frozen-lockfile --ignore-scripts`.
+4. Install only in a throwaway container: `docker run --rm --user $(id -u):$(id -g) -e HOME=/tmp -v /path/to/sourced-carousel:/app -w /app oven/bun:1 bun install --frozen-lockfile --ignore-scripts`.
 5. Run the checks: `bunx tsc --noEmit && bun test` (in the container) and `scripts/carousel.sh selftest`.
 6. Re-run the Trivy command from section 4 and compare with the numbers above.
 7. For GitHub Actions updates, resolve the new tag to a full commit SHA with `gh api repos/<owner>/<repo>/git/ref/tags/<tag>` (dereference annotated tags through `git/tags/<sha>`), confirm it with `gh api repos/<owner>/<repo>/commits/<sha>`, and keep the tag as a comment on the same line.
