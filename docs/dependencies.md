@@ -25,12 +25,12 @@ The 12 first-level dependencies of satori are the ones written in its `bun.lock`
 
 | Package | Version | License | Runtime? | Install scripts |
 | ------- | ------- | ------- | -------- | --------------- |
-| typescript | 5.9.3 | Apache-2.0 | no, type checking only (`tsc --noEmit`) | none declared |
+| typescript | 7.0.2 | Apache-2.0 | no, type checking only (`tsc --noEmit`) | none declared |
 | @types/bun | 1.4.3 | MIT | no, type declarations only | none declared |
 
-Sources: `npm view typescript@5.9.3 license scripts --json` and `npm view @types/bun@1.4.3 license scripts --json`. Their own transitive packages (`bun-types`, `@types/node`, `undici-types`) are in section 3 and are also dev only.
+Sources: `npm view typescript@7.0.2 license scripts --json` and `npm view @types/bun@1.4.3 license scripts --json`. Their own transitive packages (`bun-types`, `@types/node`, `undici-types`) are in section 3 and are also dev only.
 
-## 3. All transitive dependencies in `bun.lock` (25 entries)
+## 3. All transitive dependencies in `bun.lock` (45 entries)
 
 21 are reached from satori at runtime. 4 are reached only from `@types/bun`. `undici-types` appears twice because `bun.lock` pins 8.12.1 at the top level and 8.9.0 nested under `@types/node`.
 
@@ -61,10 +61,11 @@ Sources: `npm view typescript@5.9.3 license scripts --json` and `npm view @types
 | bun-types | 1.4.3 | MIT | dev only (via @types/bun) | none |
 | undici-types | 8.12.1 | MIT | dev only (via @types/bun) | none |
 | @types/node/undici-types | 8.9.0 | MIT | dev only (via @types/bun) | none |
+| @typescript/typescript-<platform> (20 packages, one per OS and CPU) | 7.0.2 | Apache-2.0 | dev only (optional dependencies of typescript; the installer keeps only the one for the current platform) | none |
 
 Result: no transitive package declares `preinstall`, `install` or `postinstall`. Only `harfbuzzjs` declares `prepare` (`make`, a build step for its own repository); `satori` declares `prepare` too (section 1). Source for every row: `npm view <pkg>@<version> license scripts --json`. No package returned an empty or unreadable response, so no row is "not verified".
 
-Licenses in the transitive table: MIT (24 entries) and ISC (`css-color-keywords`). Across the whole lockfile the direct packages add MPL-2.0 (satori, @resvg/resvg-wasm), Apache-2.0 (typescript) and MIT (@types/bun).
+Licenses in the transitive table: MIT (24 entries), ISC (`css-color-keywords`) and Apache-2.0 (the 20 `@typescript/typescript-<platform>` packages, published by the same npm account as typescript, `microsoft1es`). Across the whole lockfile the direct packages add MPL-2.0 (satori, @resvg/resvg-wasm), Apache-2.0 (typescript) and MIT (@types/bun).
 
 ## 4. Vulnerability scan (Trivy)
 
