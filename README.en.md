@@ -22,7 +22,7 @@ The editable diagram files are in [docs/diagrams/](docs/diagrams/): `architectur
 
 ## Installation
 
-Docker is required. Nothing is installed on your system: everything runs in a container.
+Docker is required. The project's code only runs in a container.
 
 ```
 git clone https://github.com/lpalvess/sourced-carousel.git
@@ -47,6 +47,11 @@ Or, inside a Claude Code session (version 2.1.275 or later):
 ```
 
 The first time, ask the skill to run `setup`, which installs the dependencies in the container and is the only step with network. Then ask, from any folder, for example: "make a carousel from this post using the facts in facts.md". The skill proposes a slide plan, waits for your approval, validates, writes the PDF to `out/` and never publishes anything.
+
+Two things to know before you install it as a plugin:
+
+- On install, Claude Code itself installs the dependencies from `bun.lock` into the plugin folder, if Bun is on your PATH. According to the Claude Code documentation, this install runs no package scripts and uses only the versions pinned in the lockfile. The project's code still runs only in the container.
+- The skill only works in Claude Code, because it needs Docker and a bash script. It does not run in claude.ai chat.
 
 If you cloned the repository, you can also load the plugin for one session: `claude --plugin-dir /path/to/sourced-carousel`.
 
