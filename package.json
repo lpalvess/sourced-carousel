@@ -11,10 +11,10 @@
   },
   "dependencies": {
     "@resvg/resvg-wasm": "2.6.2",
-    "satori": "0.57.2"
+    "satori": "0.63.2"
   },
   "devDependencies": {
-    "@types/bun": "1.4.3",
+    "@types/bun": "1.4.4",
     "typescript": "5.9.3"
   }
 }
